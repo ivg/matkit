@@ -6,10 +6,9 @@ analysis and arbitrary transformations on mathematical expressions. In
 other words this is a symbolic computer algebra system, not a number
 cruncher. Its main purpose is to help engineers in their every day
 work. How this can be done? First of all, we'll define a terse and
-expressive language for mathematical expressions. It is so tedious to
-write something like this: $\mathbf{A}\mathbf{x}=\mathbf{b}$ (and this
-is the simplest non trivial expression I can imagine). What we offer,
-is
+expressive language for mathematical expressions. It is tedious to
+write an expression like: $\mathbf{A}\mathbf{x}=\mathbf{b}$. 
+Instead we should be able to write:
 
    Ax = b.
 
@@ -54,15 +53,15 @@ although a shortcut for the above can be provided:
 
 (though it seems that shortcut is even longer...).
 
-Since the declaration can be specified manually by a user, analyzer
+Since the declaration can be specified manually by a user, the analyzer
 becomes a validator -- a tool to check the correctness of the
-expression, consider the following example:
+expression. Consider the following example:
 
   echo "Ax=b, 
         where A is in [n,m],
               b is in [m]". | matkit analyze 
 
-can yield something like this:
+will yield:
 
   Expression b is expected to have the following properties:
      b is in [n]
@@ -97,8 +96,7 @@ Printer
 -------
 
 Printer will transform an AST to its textual representation
-(i.e. antiparser). Though, there're some difficulties, e.g. with a
-straight forward approach the expression
+(i.e. antiparser). This approach has difficulties. For example the expression
 
           x'A'Ax
 
@@ -107,7 +105,7 @@ will be printed as
           (((x')*(A'))*A)*x.
 
 
-And it is not only ugly, but incomprehensible. Obviously that is not
+This is not only ugly, but also incomprehensible. Obviously this is not
 what we want.
 
 Typer
@@ -151,7 +149,7 @@ BLAS/LAPACK compiler
 
 This tool will transform an AST to an intermediate language of BLAS
 and LAPACK expressions, that can be considered as a mathematical
-assembler languages. A set of translators from assembler to a concrete
+assembler language. A set of translators from assembler to a concrete
 language implementation can be developed, like C translator, or
 fortran translator. 
 
