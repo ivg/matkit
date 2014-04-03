@@ -23,7 +23,7 @@ with sexp
 type index = Num of int | Sym of string with sexp
 
 type t =
-  | Var of string              (** A variable        *)
+  | Var of char                (** A variable        *)
   | Uop of unary  * t          (** Unary operation   *)
   | Bop of binary * t * t      (** Binary operation  *)
   | Sub of t * index list      (** Indexing  *)
