@@ -2,30 +2,42 @@
 
 open Core.Std
 
-(** binary operations  *)
-type binary =
-  | Mul        (** an overloaded multiplication  *)
-  | Sub        (** subtraction  *)
-  | Add        (** Addition  *)
-  | Pow        (** Power *)
-  | Had        (** Hadamard multiplication  *)
-with sexp
+module Base = struct
+  module Sym = String
+  type sym = Sym.t with sexp,compare
+  (** a type to represent symbol (still not sure what to use)  *)
 
-(** unary operations  *)
-type unary =
-  | Tran      (** Transpose (and possibly conjugate)   *)
-  | Conj      (** Conjugate (without a transposition)  *)
-  | UNeg      (** Negation  *)
-with sexp
+  (** binary operations  *)
+  type binary =
+    | Mul        (** an overloaded multiplication  *)
+    | Sub        (** subtraction  *)
+    | Add        (** Addition  *)
+    | Pow        (** Power *)
+    | Had        (** Hadamard multiplication  *)
+  with sexp, compare
+
+  (** unary operations  *)
+  type unary =
+    | Tran      (** Transpose (and possibly conjugate)   *)
+    | Conj      (** Conjugate (without a transposition)  *)
+    | UNeg      (** Negation  *)
+  with sexp, compare
 
 
-(** a type to denote matrix indices  *)
-type index = Num of int | Sym of string with sexp
+  (** a type to denote matrix indices  *)
+  type index = INum of sym       (** constant index    *)
+             | IVar of sym       (** variable index    *)
+  with sexp, compare
 
-type t =
-  | Var of char                (** A variable        *)
-  | Uop of unary  * t          (** Unary operation   *)
-  | Bop of binary * t * t      (** Binary operation  *)
-  | Sub of t * index list      (** Indexing  *)
-with sexp
+  (** AST type *)
+  type t =
+    | Num of int                 (** Numeric constant  *)
+    | Var of sym                 (** A variable        *)
+    | Uop of unary  * t          (** Unary operation   *)
+    | Bop of binary * t * t      (** Binary operation  *)
+    | Sub of t * index list      (** Indexing  *)
+  with sexp, compare, variants
+end
 
+include Base
+module Ast = Comparable.Make(Base)
