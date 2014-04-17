@@ -22,7 +22,6 @@ open Ast
 %left PLUS
 %left MINUS
 %left MUL
-%left NEG
 
 %token <char> SYM
 %token <string> KIND
@@ -49,21 +48,21 @@ stmt:
 
 expr:
   | term            { $1 }
-  | expr binop expr { Bop($2, $1, $3) }
-  | unop term       { Uop($1, $2) }  
+  | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
+  | op=unop t=term            { Uop(op, t) }
   ;
-  
+
 term:
   | LPAR expr RPAR  { $2 }
   | SYM             { Exp.var $1 }
   ;
-  
-unop:
+
+%inline unop:
   | NEG             { UNeg }
   | CONJ            { Conj }
   ;
-  
-binop:
+
+%inline binop:
   | PLUS            { Add }
   | MINUS           { Sub }
   | MUL             { Mul }
@@ -77,6 +76,3 @@ decls:
 decl:
   | SYM IS KIND { ($1,$3) }
   ;
-
-
-
