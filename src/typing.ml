@@ -3,6 +3,8 @@ open Ast
 open Type
 
 
+
+
 let (=~) (t1,s1) (t2,s2) = Commute (t1,s1,t2,s2)
 
 let one = INum One
