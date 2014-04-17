@@ -3,19 +3,14 @@ open Ast
 %}
 
 (* keywords *)
-%token END DOT LPAR RPAR IS WHERE COMMA
+%token END DOT COMMA LPAR RPAR IS WHERE AND
 
 (* operations *)
-%token PLUS
-%token MINUS
-%token MUL
-%token DIV
-%token HAD
-%token HDIV
-%token POW
-%token HPOW
-%token NEG
-%token CONJ
+%token PLUS MINUS
+%token MUL DIV
+%token HAD HDIV
+%token POW HPOW
+%token NEG CONJ
 %token EQUALS
 
 (* associativity and precedence *)
@@ -56,6 +51,7 @@ expr:
 term:
   | LPAR expr RPAR  { $2 }
   | SYM             { Exp.var $1 }
+  | NUM             { Num(int_of_string $1) }
   ;
   
 unop:

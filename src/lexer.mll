@@ -19,6 +19,7 @@ open Parser
 (* id *)
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
+let kind = lowercase+
 
 (* numbers *)
 let digit = ['0'-'9']
@@ -52,6 +53,7 @@ rule tokens = parse
   | ")" {RPAR}
   | "where" {WHERE}
   | "is"    {IS}
+  | "and"   {AND}
   | "#" {comment lexbuf}
 and comment = parse
   | newline {new_line lexbuf; tokens lexbuf}
