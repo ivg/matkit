@@ -3,7 +3,7 @@ open Ast
 open Type
 
 (** Environment is a symbol table *)
-module Table = Ast.Table
+module Table = Exp.Table
 type t = ty Table.t with sexp
 
 let empty () : t = Table.create ()
