@@ -5,17 +5,12 @@ open Type
 
 
 
-let (=~) (t1,s1) (t2,s2) = Commute (t1,s1,t2,s2)
-
 let one = INum One
 let scalar = (one, one)
 let vector d1 = (d1, one)
 let matrix d1 d2 = (d1,d2)
 
-let equal_constr t1 t2 = [
-  (t1,Lhs) =~ (t2,Lhs);
-  (t1,Rhs) =~ (t2,Rhs);
-]
+let equal_constr (l1,r1) (l2,r2)  = [l1,r1; l2, r2]
 
 let type_of_string = function
   | "mat" | "matrix" | "matrices" -> `Matrix
@@ -34,21 +29,19 @@ let generate_lexical_constraints env =
     | Bop (_,e1,e2) -> List.concat [loop e1; loop e2]
     | Var _ when Env.is_bound env exp -> []
     | Var s when is_lower s ->
-      let ty = Env.get_or_add_fresh env exp in
-      [Eq (ty,Rhs,one)]
+      let (_,ri) = Env.get_or_add_fresh env exp in
+      [ri, one]
     | Var _ -> [] in
   loop
-
-
 
 let init exp cs =
   let env = Env.empty () in
   let cs = List.fold cs ~init:[] ~f:(fun constrs (sym,constr) ->
-      let ty = Env.get_or_add_fresh env (Var (String.of_char sym)) in
+      let (li,ri) = Env.get_or_add_fresh env (Var (String.of_char sym)) in
       match type_of_string constr with
       | `Matrix -> constrs
-      | `Vector -> Eq (ty,Rhs,one) :: constrs
-      | `Scalar -> Eq (ty,Rhs,one) :: Eq (ty,Lhs,one) :: constrs
+      | `Vector -> (ri,one) :: constrs
+      | `Scalar -> (ri,one) :: (li,one) :: constrs
       | `Unknown s ->
         printf "Warning> unknown property %s" s;
         constrs) in
@@ -60,12 +53,8 @@ let init exp cs =
 (** [binary_constr t1 t2 ty op] given an expression $A `op` B = C$,
     with [A:t1, B:t2, C:ty] generate constraint according to
     operation [op] *)
-let binary_constr t1 t2 ty = function
-  | Mul -> [
-      (t1,Lhs) =~ (ty,Lhs);
-      (t2,Rhs) =~ (ty,Rhs);
-      (t1,Rhs) =~ (t2,Lhs)
-    ]
+let binary_constr ((l1,r1) as t1) ((l2,r2) as t2) ((l3,r3) as ty) = function
+  | Mul -> [l1,l3; r2,r3; r1,l2]
   | (Sub|Add|Had) -> List.concat [
       equal_constr t1 t2;
       equal_constr t1 ty;
@@ -76,40 +65,50 @@ let binary_constr t1 t2 ty = function
       equal_constr t2 ty;
     ]
 
-let unary_constr t1 ty = function
-  | Tran -> [
-      (t1,Lhs) =~ (ty,Rhs);
-      (t1,Rhs) =~ (ty,Lhs);
-    ]
-  | (UNeg|Conj) -> equal_constr t1 ty
+let unary_constr ((l1,r1) as t1) ((l2,r2) as t2) = function
+  | Tran -> [ l1, r2; r1, l2 ]
+  | (UNeg|Conj) -> equal_constr t1 t2
 
 let rec recon ctx expr : (ty * constrs) =
-  let ty = Env.get_or_add_fresh ctx expr in
+  let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
   match expr with
   | Num _ ->  scalar ,[]
-  | Var id -> ty,[]
+  | Var id -> tt,[]
   | Sub (s,i1,i2) ->
-    let ts,cs = recon ctx s in
-    ty, List.concat [
+    let _,cs = recon ctx s in
+    tt, List.concat [
       (match i1,i2 with
-      | None, Some _ -> [Eq (ty,Rhs,one)]
-      | Some _, None -> [Eq (ty,Lhs,one)]
-      | Some _, Some _ -> [
-          Eq (ty,Rhs,one);
-          Eq (ty,Lhs,one)
-        ]
+      | None, Some _ -> [rt,one]
+      | Some _, None -> [lt,one]
+      | Some _, Some _ -> [rt,one; lt,one]
       | None, None -> []);
       cs
     ]
   | Bop (op,s1,s2) ->
     let t1,c1 = recon ctx s1 in
     let t2,c2 = recon ctx s2 in
-    ty, List.concat [binary_constr t1 t2 ty op; c1; c2]
+    tt, List.concat [binary_constr t1 t2 tt op; c1; c2]
   | Uop (op,s1) ->
     let t1,c1 = recon ctx s1 in
-    ty,List.concat [unary_constr t1 ty op; c1]
+    tt,List.concat [unary_constr t1 tt op; c1]
 
+
+module Subst = struct
+  include Hashable.Make(struct
+      type t = ty with sexp,compare
+      let hash = Hashtbl.hash
+    end)
+
+  let extend subs (t1,t2) = ()
+end
 
 let infer env expr =
-  let (ty,_constrs) = recon env expr in
+  let (ty,cs) = recon env expr in
+  (* let rec unify cs subst = match cs with *)
+  (*   | [] -> subst *)
+  (*   | c::cs -> match c with *)
+  (*     | (IVar v, rhs) -> (match Subst.find v with *)
+  (*       | Some v -> unify (v,rhs :: cs) *)
+  (*       | None -> ) *)
+  (*   subst in *)
   ty
