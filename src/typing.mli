@@ -1,3 +1,5 @@
+open Core.Std
+open Ast
+open Type
 
-
-val infer: Env.t -> Ast.t -> Type.ty
+val infer: Env.t -> exp -> ty
