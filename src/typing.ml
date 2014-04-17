@@ -41,13 +41,13 @@ let unary_constr t1 ty = function
     ]
   | (UNeg|Conj) -> equal_constr t1 ty
 
-let rec recons ctx expr : (ty * constrs) =
+let rec recon ctx expr : (ty * constrs) =
   let ty = Env.get_or_add_fresh ctx expr in
   match expr with
   | Num _ ->  scalar ,[]
   | Var id -> ty,[]
   | Sub (s,i1,i2) ->
-    let ts,cs = recons ctx s in
+    let ts,cs = recon ctx s in
     ty, List.concat [
       (match i1,i2 with
       | None, Some _ -> [Eq (ty,Rhs,one)]
@@ -60,14 +60,14 @@ let rec recons ctx expr : (ty * constrs) =
       cs
     ]
   | Bop (op,s1,s2) ->
-    let t1,c1 = recons ctx s1 in
-    let t2,c2 = recons ctx s2 in
+    let t1,c1 = recon ctx s1 in
+    let t2,c2 = recon ctx s2 in
     ty, List.concat [binary_constr t1 t2 ty op; c1; c2]
   | Uop (op,s1) ->
-    let t1,c1 = recons ctx s1 in
+    let t1,c1 = recon ctx s1 in
     ty,List.concat [unary_constr t1 ty op; c1]
 
 
 let infer env expr =
-  let (ty,_constrs) = recons env expr in
+  let (ty,_constrs) = recon env expr in
   ty
