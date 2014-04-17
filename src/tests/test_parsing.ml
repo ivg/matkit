@@ -10,13 +10,22 @@ let string_of_parser_output out =
 
 
 
-let run_test () =
-  let data = "a." in
+let run_test data =
   Parser.script Lexer.tokens (Lexing.from_string data)
   |> string_of_parser_output
   |>printf "%s\n"
 
-let () = run_test ()
+let run_tests () =
+  run_test "a.";
+  run_test "a + b.";
+  run_test "a - b.";
+  run_test "a * b.";
+  run_test "a + b * c.";
+  run_test "a * b + c.";
+  run_test "~a - b.";
+  run_test "~a + ~b - c."
+
+let () = run_tests ()
 
 
 

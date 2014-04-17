@@ -2,9 +2,31 @@
 open Ast
 %}
 
+(* keywords *)
 %token END DOT LPAR RPAR IS WHERE COMMA
+
+(* operations *)
+%token PLUS
+%token MINUS
+%token MUL
+%token DIV
+%token HAD
+%token HDIV
+%token POW
+%token HPOW
+%token NEG
+%token CONJ
+%token EQUALS
+
+(* associativity and precedence *)
+%left PLUS
+%left MINUS
+%left MUL
+%left NEG
+
 %token <char> SYM
 %token <string> KIND
+%token <string> NUM
 
 %start script
 %type <(Ast.exp option * (char * string) list) list> script;
@@ -26,17 +48,33 @@ stmt:
   ;
 
 expr:
-  | LPAR expr RPAR {$2}
-  | SYM {Exp.var $1}
+  | term            { $1 }
+  | unop term       { Uop($1, $2) }
+  | expr binop expr { Bop($2, $1, $3) }
+  ;
+  
+term:
+  | SYM             { Exp.var $1 }
+  | LPAR expr RPAR  { $2 }
+  
+unop:
+  | NEG             { UNeg }
+  | CONJ            { Conj }
+  ;
+  
+binop:
+  | PLUS            { Add }
+  | MINUS           { Sub }
+  | MUL             { Mul }
   ;
 
 decls:
   | decl {[$1]}
-  | decl COMMA decls { $1 :: $3}
+  | decl COMMA decls { $1::$3 }
   ;
 
 decl:
-  | SYM IS KIND {($1,$3)}
+  | SYM IS KIND { ($1,$3) }
   ;
 
 
