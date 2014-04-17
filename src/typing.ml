@@ -17,6 +17,46 @@ let equal_constr t1 t2 = [
   (t1,Rhs) =~ (t2,Rhs);
 ]
 
+let type_of_string = function
+  | "mat" | "matrix" | "matrices" -> `Matrix
+  | "vec" | "vector" | "vectors"  -> `Vector
+  | "num" | "sca" | "scalar" | "scalars" -> `Scalar
+  | s -> `Unknown s
+
+let is_upper s = Sym.exists s ~f:Char.is_uppercase
+let is_lower s = Sym.exists s ~f:Char.is_lowercase
+
+let generate_lexical_constraints env =
+  let rec loop exp =
+    match exp with
+    | Num _ -> []
+    | Uop (_,e1) | Sub (e1,_,_) -> loop e1
+    | Bop (_,e1,e2) -> List.concat [loop e1; loop e2]
+    | Var _ when Env.is_bound env exp -> []
+    | Var s when is_lower s ->
+      let ty = Env.get_or_add_fresh env exp in
+      [Eq (ty,Rhs,one)]
+    | Var _ -> [] in
+  loop
+
+
+
+let init exp cs =
+  let env = Env.empty () in
+  let cs = List.fold cs ~init:[] ~f:(fun constrs (sym,constr) ->
+      let ty = Env.get_or_add_fresh env (Var (String.of_char sym)) in
+      match type_of_string constr with
+      | `Matrix -> constrs
+      | `Vector -> Eq (ty,Rhs,one) :: constrs
+      | `Scalar -> Eq (ty,Rhs,one) :: Eq (ty,Lhs,one) :: constrs
+      | `Unknown s ->
+        printf "Warning> unknown property %s" s;
+        constrs) in
+  match exp with
+  | Some exp ->
+    env, List.concat [generate_lexical_constraints env exp; cs]
+  | None -> env, cs
+
 (** [binary_constr t1 t2 ty op] given an expression $A `op` B = C$,
     with [A:t1, B:t2, C:ty] generate constraint according to
     operation [op] *)
