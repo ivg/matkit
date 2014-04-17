@@ -1,3 +1,3 @@
 
 
-val infer: Type.env -> Ast.t -> Type.t
+val infer: Env.t -> Ast.t -> Type.ty

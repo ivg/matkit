@@ -3,9 +3,8 @@ open Ast
 open Type
 
 (** Environment is a symbol table *)
-module Table = Sym.Table
+module Table = Ast.Table
 type t = ty Table.t with sexp
-
 
 let empty () : t = Table.create ()
 
@@ -28,11 +27,13 @@ let add_fresh (env : t) sym : ty =
   let fresh_var =
     let max_var =
       Table.fold env ~init:(Sym.of_char min_sym)
-        ~f:(fun ~key:_ ~data max_sym -> match data with
-            | TVar id -> if id < max_sym then max_sym else id
-            | _ -> (max_sym : sym)) in
-    next_sym max_var in
-  let ty = TVar fresh_var in
+        ~f:(fun ~key:_ ~data s0 -> match data with
+            | IVar s1, IVar s2 -> Sym.max s0 (Sym.max s1 s2)
+            | IVar s1,_|_,IVar s1 -> Sym.max s1 s0
+            | INum _, INum _ -> s0) in
+    let i1 = next_sym max_var in
+    IVar i1, IVar (next_sym i1) in
+  let ty = fresh_var in
   Table.add_exn env ~key:sym ~data:ty;
   ty
 

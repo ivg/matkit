@@ -2,6 +2,9 @@
 
 open Core.Std
 
+
+
+
 module Base = struct
   module Sym = String
   type sym = Sym.t with sexp,compare
@@ -23,21 +26,28 @@ module Base = struct
     | UNeg      (** Negation  *)
   with sexp, compare
 
+  type nat1 = One
+            | Succ of nat1
+  with sexp, compare
 
   (** a type to denote matrix indices  *)
-  type index = INum of sym       (** constant index    *)
+  type index = INum of nat1      (** constant index    *)
              | IVar of sym       (** variable index    *)
   with sexp, compare
 
   (** AST type *)
   type t =
-    | Num of int                 (** Numeric constant  *)
-    | Var of sym                 (** A variable        *)
-    | Uop of unary  * t          (** Unary operation   *)
-    | Bop of binary * t * t      (** Binary operation  *)
-    | Sub of t * index list      (** Indexing  *)
+    | Num of int                              (** Numeric constant  *)
+    | Var of sym                              (** A variable        *)
+    | Uop of unary  * t                       (** Unary operation   *)
+    | Bop of binary * t * t                   (** Binary operation  *)
+    | Sub of t * index option * index option  (** Indexing  *)
   with sexp, compare, variants
+  let hash = Hashtbl.hash
 end
 
 include Base
-module Ast = Comparable.Make(Base)
+module Ast = struct
+  include Comparable.Make(Base)
+  include Hashable.Make(Base)
+end
