@@ -38,7 +38,5 @@ type exp =
   | Var of sym                                (** A variable        *)
   | Uop of unary  * exp                       (** Unary operation   *)
   | Bop of binary * exp * exp                 (** Binary operation  *)
-  | Sub of exp * index option * index option  (** Indexing  *)
+  | Ind of exp * index option * index option  (** Indexing  *)
 with sexp, compare, variants
-
-
