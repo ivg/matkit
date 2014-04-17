@@ -2,7 +2,7 @@
 open Ast
 open Type
 
-type t
+type t with sexp
 
 val empty: unit -> t
 

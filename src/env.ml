@@ -13,7 +13,7 @@ let min_sym = 'a'
 (** a stub to generate fresh type variables  *)
 let next_char char : char option =
   match (Char.to_int char + 1) |> Char.of_int with
-  | Some c when Char.(is_lowercase c && is_alpha c) -> Some char
+  | Some c when Char.(is_lowercase c && is_alpha c) -> Some c
   | _ -> None
 
 let next_sym sym : sym =
