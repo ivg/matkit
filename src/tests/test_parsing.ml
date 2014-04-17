@@ -17,6 +17,7 @@ let run_test data =
 
 let run_tests () =
   run_test "a.";
+  run_test "~a.";
   run_test "a + b.";
   run_test "a - b.";
   run_test "a * b.";

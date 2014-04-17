@@ -49,13 +49,14 @@ stmt:
 
 expr:
   | term            { $1 }
-  | unop term       { Uop($1, $2) }
   | expr binop expr { Bop($2, $1, $3) }
+  | unop term       { Uop($1, $2) }  
   ;
   
 term:
-  | SYM             { Exp.var $1 }
   | LPAR expr RPAR  { $2 }
+  | SYM             { Exp.var $1 }
+  ;
   
 unop:
   | NEG             { UNeg }
