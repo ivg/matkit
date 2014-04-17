@@ -41,3 +41,7 @@ let get_or_add_fresh (env:t) sym : ty =
   match Table.find env sym with
   | Some ty -> ty
   | None -> add_fresh env sym
+
+
+let find env = Table.find env
+let is_bound env = Table.mem env

@@ -14,3 +14,6 @@ val get_or_add_fresh: t -> exp -> ty
 (** [get_or_add_fresh ctx id] if [id] is bound in [ctx] then return
     its type, else create a fresh variable, bound it to [id] and
     return it  *)
+
+val find: t -> exp -> ty option
+val is_bound: t -> exp -> bool
