@@ -14,9 +14,11 @@ open Ast
 %token EQUALS
 
 (* associativity and precedence *)
+%nonassoc EQUALS
 %left PLUS
 %left MINUS
 %left MUL
+%left HAD
 
 %token <char> SYM
 %token <string> KIND
@@ -42,19 +44,23 @@ stmt:
   ;
 
 expr:
-  | term            { $1 }
+  | term                      { $1 }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
-  | op=unop t=term            { Uop(op, t) }
+  | op=pre_unop t=term        { Uop(op, t) }
   ;
 
 term:
-  | LPAR expr RPAR  { $2 }
-  | SYM             { Exp.var $1 }
-  | NUM             { Num(int_of_string $1) }
+  | t=term op=post_unop { Uop(op, t) }
+  | LPAR expr RPAR      { $2 }
+  | SYM                 { Exp.var $1 }
+  | NUM                 { Num(int_of_string $1) }
   ;
 
-%inline unop:
+%inline pre_unop:
   | NEG             { UNeg }
+  ;
+  
+%inline post_unop:
   | CONJ            { Conj }
   ;
 
@@ -62,6 +68,8 @@ term:
   | PLUS            { Add }
   | MINUS           { Sub }
   | MUL             { Mul }
+  | HAD             { Had }
+  | POW             { Pow }
   ;
 
 decls:
