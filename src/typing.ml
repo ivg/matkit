@@ -2,13 +2,7 @@ open Core.Std
 open Ast
 open Type
 
-
-
-
 let one = INum One
-let scalar = (one, one)
-
-let equal_constr (l1,r1) (l2,r2)  = [l1,r1; l2,r2]
 
 let type_of_string = function
   | "mat" | "matrix" | "matrices" -> `Matrix
@@ -56,13 +50,13 @@ let binary_constr (l1,r1) (l2,r2) (l3,r3) = function
   | Pow -> [l1,one; l2,one; l2,l3; r2,r3]
 
 let unary_constr ((l1,r1) as t1) ((l2,r2) as t2) = function
-  | Tran -> [ l1, r2; r1, l2 ]
-  | (UNeg|Conj) -> equal_constr t1 t2
+  | Tran ->        [l1,r2; r1,l2]
+  | (UNeg|Conj) -> [l1,l2; r1,r2]
 
 let rec recon ctx expr : (ty * constrs) =
   let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
   match expr with
-  | Num _ ->  scalar ,[]
+  | Num _ ->  (one,one) ,[]
   | Var _ -> tt,[]
   | Sub (s,i1,i2) ->
     let _,cs = recon ctx s in
@@ -87,11 +81,7 @@ let substitute (f,t) x = if x = f then t else x
 
 
 module Subst = struct
-  include Hashable.Make(struct
-      type t = index with sexp,compare
-      let hash = Hashtbl.hash
-    end)
-  include Table
+  include Index.Table
 
   let replace t s = map t ~f:(substitute s)
 
@@ -105,17 +95,14 @@ module Subst = struct
 end
 
 
+
 exception Type_error of nat1 * nat1 with sexp
 
 let is_var = function
   | IVar _ -> true
   | INum _ -> false
 
-let rec unify cs subst =
-  printf "\n%s\n=>\n%s\n\n"
-    (Sexp.to_string_hum (sexp_of_constrs cs))
-    (Subst.to_string subst);
-  match cs with
+let rec unify cs subst = match cs with
   | [] -> subst
   | (INum n, INum m)::_ when n <> m -> raise (Type_error (n,m))
   | (x,y)::cs when x = y -> unify cs subst
@@ -130,9 +117,12 @@ let infer cs expr =
   let cs = cs @ ucs |> List.sort ~cmp:compare |> List.dedup in
   let subst = Subst.create () in
   let subst = unify cs subst in
+  let ds = Subst.fold subst ~init:(UnionFind.create ())
+      ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
+  Env.create_substitution env ds
   (* printf "%s\n s.t.\n%s\nenv = \n%s\nsubst = %s%!\n" *)
   (*   (Exp.to_string expr) *)
   (*   (Sexp.to_string_hum (sexp_of_constrs cs)) *)
   (*   (Sexp.to_string_hum (Env.sexp_of_t env)) *)
   (*   (Subst.to_string subst); *)
-  ty
+
