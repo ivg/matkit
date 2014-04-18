@@ -27,10 +27,22 @@ type nat1 = One
           | Succ of nat1
 with sexp, compare
 
+
 (** a type to denote matrix indices  *)
 type index = INum of nat1      (** constant index    *)
            | IVar of sym       (** variable index    *)
 with sexp, compare
+
+module Index = struct
+  module T = struct
+    type t = index with sexp,compare
+    let hash = Hashtbl.hash
+  end
+  include T
+  include Comparable.Make(T)
+  include Hashable.Make(T)
+end
+
 
 (** AST type *)
 type exp =
