@@ -7,7 +7,7 @@ open Ast
 %token <string> KIND
 
 %start script
-%type <(Ast.t option * (char * string) list) list> script;
+%type <(Ast.exp option * (char * string) list) list> script;
 
 %%
 
@@ -27,7 +27,7 @@ stmt:
 
 expr:
   | LPAR expr RPAR {$2}
-  | SYM {Var $1}
+  | SYM {Exp.var $1}
   ;
 
 decls:

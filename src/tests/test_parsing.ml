@@ -1,7 +1,8 @@
 open Core.Std
+open Ast
 
 
-type parser_output = (Ast.t option * (char * string) list) list
+type parser_output = (exp option * (char * string) list) list
 with sexp
 
 let string_of_parser_output out =

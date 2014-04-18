@@ -2,7 +2,6 @@
 
 open Core.Std
 
-
 module Sym = String
 type sym = Sym.t with sexp,compare
 (** a type to represent symbol (still not sure what to use)  *)
@@ -23,6 +22,7 @@ type unary =
   | UNeg      (** Negation  *)
 with sexp, compare
 
+(** positive natural numbers  *)
 type nat1 = One
           | Succ of nat1
 with sexp, compare
@@ -42,12 +42,3 @@ type exp =
 with sexp, compare, variants
 
 
-module Ast = struct
-  module T = struct
-    type t = exp with sexp,compare
-    let hash = Hashtbl.hash
-  end
-  include T
-  include Comparable.Make(T)
-  include Hashable.Make(T)
-end
