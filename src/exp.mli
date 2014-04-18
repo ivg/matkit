@@ -18,5 +18,7 @@ val tran: t -> t
 val conj: t -> t
 val to_string: t -> string
 
+val fold: t -> init:'a -> f:(t -> 'a -> 'a) -> 'a
+
 include Hashable.S with type t := t
 include Comparable.S with type t := t
