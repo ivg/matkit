@@ -10,7 +10,7 @@ open Ast
 %token MUL DIV
 %token HAD HDIV
 %token POW HPOW
-%token NEG CONJ
+%token NEG CONJ INV
 %token EQUALS
 
 (* associativity and precedence *)
@@ -45,12 +45,13 @@ stmt:
 
 expr:
   | term                      { $1 }
+  | expr INV                  { Bop(Pow, $1, Num (-1)) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
-  | op=pre_unop t=term        { Uop(op, t) }
+  | t=term op=post_unop       { Uop(op, t) }  
   ;
 
 term:
-  | t=term op=post_unop { Uop(op, t) }
+  | op=pre_unop t=term  { Uop(op, t) }
   | LPAR expr RPAR      { $2 }
   | SYM                 { Exp.var $1 }
   | NUM                 { Num(int_of_string $1) }

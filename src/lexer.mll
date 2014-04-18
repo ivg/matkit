@@ -48,7 +48,7 @@ rule tokens = parse
   | "^" {POW}
   | ".^" {HPOW}
   | "~" {NEG}
-  | "`" {CONJ}
+  | "`" {INV}
   | "(" {LPAR}
   | ")" {RPAR}
   | "where" {WHERE}
