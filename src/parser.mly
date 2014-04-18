@@ -10,7 +10,7 @@ open Ast
 %token MUL DIV
 %token HAD HDIV
 %token POW HPOW
-%token NEG CONJ INV
+%token NEG CONJ INV TRAN
 %token EQUALS
 
 (* associativity and precedence *)
@@ -62,6 +62,7 @@ term:
   ;
   
 %inline post_unop:
+  | TRAN            { Tran }
   | CONJ            { Conj }
   ;
 
