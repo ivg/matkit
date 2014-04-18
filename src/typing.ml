@@ -7,10 +7,8 @@ open Type
 
 let one = INum One
 let scalar = (one, one)
-let vector d1 = (d1, one)
-let matrix d1 d2 = (d1,d2)
 
-let equal_constr (l1,r1) (l2,r2)  = [l1,r1; l2, r2]
+let equal_constr (l1,r1) (l2,r2)  = [l1,r1; l2,r2]
 
 let type_of_string = function
   | "mat" | "matrix" | "matrices" -> `Matrix
@@ -18,7 +16,6 @@ let type_of_string = function
   | "num" | "sca" | "scalar" | "scalars" -> `Scalar
   | s -> `Unknown s
 
-let is_upper s = Sym.exists s ~f:Char.is_uppercase
 let is_lower s = Sym.exists s ~f:Char.is_lowercase
 
 let generate_lexical_constraints env =
@@ -26,7 +23,7 @@ let generate_lexical_constraints env =
     match exp with
     | Num _ -> []
     | Uop (_,e1) | Sub (e1,_,_) -> loop e1
-    | Bop (_,e1,e2) -> List.concat [loop e1; loop e2]
+    | Bop (_,e1,e2) -> loop e1 @ loop e2
     | Var _ when Env.is_bound env exp -> []
     | Var s when is_lower s ->
       let (_,ri) = Env.get_or_add_fresh env exp in
@@ -50,20 +47,13 @@ let init exp cs =
     env, List.concat [generate_lexical_constraints env exp; cs]
   | None -> env, cs
 
-(** [binary_constr t1 t2 ty op] given an expression $A `op` B = C$,
-    with [A:t1, B:t2, C:ty] generate constraint according to
+(** [binary_constr t1 t2 t3 op] given an expression $A `op` B = C$,
+    with [A:t1, B:t2, C:t3] generate constraint according to
     operation [op] *)
-let binary_constr ((l1,r1) as t1) ((l2,r2) as t2) ((l3,r3) as ty) = function
+let binary_constr (l1,r1) (l2,r2) (l3,r3) = function
   | Mul -> [l1,l3; r2,r3; r1,l2]
-  | (Sub|Add|Had) -> List.concat [
-      equal_constr t1 t2;
-      equal_constr t1 ty;
-      equal_constr t2 ty;
-    ]
-  | Pow -> List.concat [
-      equal_constr t1 scalar;
-      equal_constr t2 ty;
-    ]
+  | Sub|Add|Had -> [l1,l2; l1,l3; l2,l3; r1,r2; r1,r3; r2,r3;]
+  | Pow -> [l1,one; l2,one; l2,l3; r2,r3]
 
 let unary_constr ((l1,r1) as t1) ((l2,r2) as t2) = function
   | Tran -> [ l1, r2; r1, l2 ]
@@ -73,7 +63,7 @@ let rec recon ctx expr : (ty * constrs) =
   let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
   match expr with
   | Num _ ->  scalar ,[]
-  | Var id -> tt,[]
+  | Var _ -> tt,[]
   | Sub (s,i1,i2) ->
     let _,cs = recon ctx s in
     tt, List.concat [
@@ -93,22 +83,56 @@ let rec recon ctx expr : (ty * constrs) =
     tt,List.concat [unary_constr t1 tt op; c1]
 
 
+let substitute (f,t) x = if x = f then t else x
+
+
 module Subst = struct
   include Hashable.Make(struct
-      type t = ty with sexp,compare
+      type t = index with sexp,compare
       let hash = Hashtbl.hash
     end)
+  include Table
 
-  let extend subs (t1,t2) = ()
+  let replace t s = map t ~f:(substitute s)
+
+  let extend_replace t (t1,t2) =
+    add_exn t ~key:t1 ~data:t2;
+    replace t (t1,t2)
+
+  let to_string t =
+    Sexp.to_string_hum (sexp_of_t sexp_of_index t)
+
 end
 
-let infer env expr =
-  let (ty,cs) = recon env expr in
-  (* let rec unify cs subst = match cs with *)
-  (*   | [] -> subst *)
-  (*   | c::cs -> match c with *)
-  (*     | (IVar v, rhs) -> (match Subst.find v with *)
-  (*       | Some v -> unify (v,rhs :: cs) *)
-  (*       | None -> ) *)
-  (*   subst in *)
+
+exception Type_error of nat1 * nat1 with sexp
+
+let is_var = function
+  | IVar _ -> true
+  | INum _ -> false
+
+let rec unify cs subst =
+  printf "\n%s\n=>\n%s\n\n"
+    (Sexp.to_string_hum (sexp_of_constrs cs))
+    (Subst.to_string subst);
+  match cs with
+  | [] -> subst
+  | (INum n, INum m)::_ when n <> m -> raise (Type_error (n,m))
+  | (x,y)::cs when x = y -> unify cs subst
+  | (x,y)::cs when not (is_var x) -> unify ((y,x)::cs) subst
+  | (lhs,rhs)::cs -> match Subst.find subst lhs with
+    | None -> unify cs (Subst.extend_replace subst (lhs,rhs))
+    | Some v -> unify ((rhs,v) :: cs) subst
+
+let infer cs expr =
+  let env,ucs = init (Some expr) cs in
+  let ty,cs = recon env expr in
+  let cs = cs @ ucs |> List.sort ~cmp:compare |> List.dedup in
+  let subst = Subst.create () in
+  let subst = unify cs subst in
+  (* printf "%s\n s.t.\n%s\nenv = \n%s\nsubst = %s%!\n" *)
+  (*   (Exp.to_string expr) *)
+  (*   (Sexp.to_string_hum (sexp_of_constrs cs)) *)
+  (*   (Sexp.to_string_hum (Env.sexp_of_t env)) *)
+  (*   (Subst.to_string subst); *)
   ty

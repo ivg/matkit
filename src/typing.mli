@@ -9,6 +9,6 @@ val recon: Env.t -> exp -> ty * constrs
 (** [recon env exp] reconstruct type of expression [exp] and
     generates constraints *)
 
-val infer: Env.t -> exp -> ty
+val infer: (char *string) list -> exp -> ty
 (** [infer env exp] infer a type of expression  *)
 
