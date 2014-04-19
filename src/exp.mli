@@ -14,6 +14,7 @@ val ( + ): t -> t -> t
 val ( - ): t -> t -> t
 val ( *. ): t -> t -> t
 val ( ** ): t -> t -> t
+val neg: t -> t
 val tran: t -> t
 val conj: t -> t
 val to_string: t -> string
