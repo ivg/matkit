@@ -4,6 +4,8 @@ open Type
 
 let one = INum One
 
+(** generate variable type according to a constrained provied by a
+    user *)
 let type_of_string = function
   | "mat" | "matrix" | "matrices" -> `Matrix
   | "vec" | "vector" | "vectors"  -> `Vector
@@ -12,6 +14,10 @@ let type_of_string = function
 
 let is_lower s = Sym.exists s ~f:Char.is_lowercase
 
+(** generate constraints according to lexical conventions.
+    The conventions are applied to variables, that are not constrained
+    explicitly by a user. The conventions are:
+    Lowercase variables are column-vectors. Everything else is a matrix. *)
 let generate_lexical_constraints env =
   let rec loop exp =
     match exp with
@@ -25,16 +31,18 @@ let generate_lexical_constraints env =
     | Var _ -> [] in
   loop
 
+(** [init exp constraints] initialize an environment from the
+    expression [exp] with respect to user constraints *)
 let init exp cs =
   let env = Env.empty () in
   let cs = List.fold cs ~init:[] ~f:(fun constrs (sym,constr) ->
-      let (li,ri) = Env.get_or_add_fresh env (Var (String.of_char sym)) in
+      let (li,ri) = Env.get_or_add_fresh env Exp.(var sym) in
       match type_of_string constr with
       | `Matrix -> constrs
       | `Vector -> (ri,one) :: constrs
       | `Scalar -> (ri,one) :: (li,one) :: constrs
       | `Unknown s ->
-        printf "Warning> unknown property %s" s;
+        printf "Warning> unknown property %s\n" s;
         constrs) in
   match exp with
   | Some exp ->
@@ -47,25 +55,28 @@ let init exp cs =
 let binary_constr (l1,r1) (l2,r2) (l3,r3) = function
   | Mul -> [l1,l3; r2,r3; r1,l2]
   | Sub|Add|Had -> [l1,l2; l1,l3; l2,l3; r1,r2; r1,r3; r2,r3;]
-  | Pow -> [l1,one; l2,one; l2,l3; r2,r3]
+  | Pow -> [l1,r1; l3,r3; l1,r1; l2,one; r2,one]
 
-let unary_constr ((l1,r1) as t1) ((l2,r2) as t2) = function
+(** impose constraints on unary expression  *)
+let unary_constr (l1,r1) (l2,r2) = function
   | Tran ->        [l1,r2; r1,l2]
   | (UNeg|Conj) -> [l1,l2; r1,r2]
 
+(** [recon ctx expr] reconstruct a type of [expr], generating a set of
+    constraints. *)
 let rec recon ctx expr : (ty * constrs) =
   let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
   match expr with
-  | Num _ ->  (one,one) ,[]
+  | Num _ ->  tt,[lt,one; rt,one]
   | Var _ -> tt,[]
   | Sub (s,i1,i2) ->
     let _,cs = recon ctx s in
     tt, List.concat [
       (match i1,i2 with
-      | None, Some _ -> [rt,one]
-      | Some _, None -> [lt,one]
-      | Some _, Some _ -> [rt,one; lt,one]
-      | None, None -> []);
+       | None, Some _ -> [rt,one]
+       | Some _, None -> [lt,one]
+       | Some _, Some _ -> [rt,one; lt,one]
+       | None, None -> []);
       cs
     ]
   | Bop (op,s1,s2) ->
@@ -120,9 +131,4 @@ let infer cs expr =
   let ds = Subst.fold subst ~init:(UnionFind.create ())
       ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
   Env.create_substitution env ds
-  (* printf "%s\n s.t.\n%s\nenv = \n%s\nsubst = %s%!\n" *)
-  (*   (Exp.to_string expr) *)
-  (*   (Sexp.to_string_hum (sexp_of_constrs cs)) *)
-  (*   (Sexp.to_string_hum (Env.sexp_of_t env)) *)
-  (*   (Subst.to_string subst); *)
 

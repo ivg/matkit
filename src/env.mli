@@ -1,20 +1,28 @@
-(** Context is a set of bindings from symbols to types  *)
+(** Context is a mapping from term to types. *)
+open Core.Std
 open Ast
 open Type
 
 type t with sexp
 
 val empty: unit -> t
+(** [empty ()] creates an empty context.  *)
 
 val add_fresh: t -> exp -> ty
-(** [add_fresh ctx sym] creates a fresh type variable and bind it
-    with identifier [sym]. Return the freshly created variable *)
+(** [add_fresh ctx t] creates a fresh type variable and bind it
+    with term [t]. Return the freshly created type variable. *)
 
 val get_or_add_fresh: t -> exp -> ty
-(** [get_or_add_fresh ctx id] if [id] is bound in [ctx] then return
+(** [get_or_add_fresh ctx t] if [t] is bound in [ctx] then return
     its type, else create a fresh variable, bound it to [id] and
-    return it  *)
+    return it.  *)
 
 val find: t -> exp -> ty option
+(** [find env t] performs a lookup in the context.  *)
+
 val is_bound: t -> exp -> bool
-val create_substitution: t -> UnionFind.t -> ty Exp.Map.t
+(** [is_bound env t] true if term [t] is bound in context [env]. *)
+
+val create_substitution: t -> UnionFind.t -> subst
+(** [create_substitution ctx unifier] accepts a unifier and
+    creates a mapping from terms to types.  *)
