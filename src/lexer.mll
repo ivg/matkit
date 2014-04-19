@@ -32,8 +32,6 @@ let decimal = digit* frac? exp?
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
 let space = ' ' | '\t'
 
-let apostrophe = '\''
-
 rule tokens = parse
   | eof {END}
   | space {tokens lexbuf}
@@ -47,6 +45,7 @@ rule tokens = parse
   | "*" {MUL}
   | "/" {DIV}
   | ".*" {HAD}
+  | "./" {HDIV}
   | "^" {POW}
   | ".^" {HPOW}
   | "~" {NEG}

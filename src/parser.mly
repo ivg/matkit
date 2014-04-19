@@ -72,6 +72,9 @@ term:
   | MUL             { Mul }
   | HAD             { Had }
   | POW             { Pow }
+(*  | DIV             { Div } *)
+(*  | HDIV            { HDiv } *)
+(*  | HPOW            { HPow } *)
   ;
 
 decls:
