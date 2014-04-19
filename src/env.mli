@@ -17,4 +17,4 @@ val get_or_add_fresh: t -> exp -> ty
 
 val find: t -> exp -> ty option
 val is_bound: t -> exp -> bool
-val create_substitution: t -> UnionFind.t -> ty Sym.Map.t
+val create_substitution: t -> UnionFind.t -> ty Exp.Map.t

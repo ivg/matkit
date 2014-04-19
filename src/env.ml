@@ -47,20 +47,9 @@ let find env = Table.find env
 let is_bound env = Table.mem env
 
 let create_substitution env ds  =
-  let module Map = Sym.Map in
+  let module Map = Exp.Map in
   let (init : ty Map.t) = Map.empty in
   Table.fold env ~init ~f:(fun ~key:expr ~data:(t1,t2) map ->
-      match expr with
-      | Var sym ->
-        let t1 = UnionFind.find ds t1 in
-        let t2 = UnionFind.find ds t2 in
-        Map.add map ~key:sym ~data:(t1,t2)
-      | _ -> map)
-
-
-
-
-
-
-
-
+      let t1 = UnionFind.find ds t1 in
+      let t2 = UnionFind.find ds t2 in
+      Map.add map ~key:expr ~data:(t1,t2))
