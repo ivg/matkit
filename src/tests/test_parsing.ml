@@ -60,8 +60,8 @@ let test_binop () =
     (Exp.(Var "A" - Var "B"), "A-B.");
     (Exp.(Var "A" * Var "B"), "A*B.");
     (Exp.(Var "A" *. Var "B"), "A.*B.");
-    (Exp.(Var "A" + (Var "B" * Var "C")), "A + B * C.");
-    (Exp.(Var "A" * Var "B" + Var "C"),  "A * B + C.")
+    (Exp.(Var "A" + (Var "B" * Var "C")), "A+B*C.");
+    (Exp.(Var "A" * Var "B" + Var "C"),  "A*B+C.")
   ]
     
 let test_combinations () =
@@ -69,7 +69,9 @@ let test_combinations () =
   test_parses [
     (Exp.(neg (Var "A") + Var "B"), "~A+B.");
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
-    (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.")
+    (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
+    (Exp.(((Num (-4))*(tran(neg (Var "A"))))+((tran(Var "B"))-((neg (Var "C"))*(Num 4)))), 
+      "-4*~A'+B'-~C*4.")
   ]
   
 (*let test_term () =
