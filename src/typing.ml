@@ -16,7 +16,7 @@ let generate_lexical_constraints env =
   let rec loop exp =
     match exp with
     | Num _ -> []
-    | Uop (_,e1) | Sub (e1,_,_) -> loop e1
+    | Uop (_,e1) | Ind (e1,_,_) -> loop e1
     | Bop (_,e1,e2) -> loop e1 @ loop e2
     | Var _ when Env.is_bound env exp -> []
     | Var s when is_lower s ->
@@ -49,7 +49,7 @@ let binary_constr (l1,r1) (l2,r2) (l3,r3) = function
   | Sub|Add|Had -> [l1,l2; l1,l3; l2,l3; r1,r2; r1,r3; r2,r3;]
   | Pow -> [l1,one; l2,one; l2,l3; r2,r3]
 
-let unary_constr ((l1,r1) as t1) ((l2,r2) as t2) = function
+let unary_constr (l1,r1) (l2,r2) = function
   | Tran ->        [l1,r2; r1,l2]
   | (UNeg|Conj) -> [l1,l2; r1,r2]
 
@@ -58,7 +58,7 @@ let rec recon ctx expr : (ty * constrs) =
   match expr with
   | Num _ ->  (one,one) ,[]
   | Var _ -> tt,[]
-  | Sub (s,i1,i2) ->
+  | Ind (s,i1,i2) ->
     let _,cs = recon ctx s in
     tt, List.concat [
       (match i1,i2 with
@@ -113,7 +113,7 @@ let rec unify cs subst = match cs with
 
 let infer cs expr =
   let env,ucs = init (Some expr) cs in
-  let ty,cs = recon env expr in
+  let (_, cs) = recon env expr in
   let cs = cs @ ucs |> List.sort ~cmp:compare |> List.dedup in
   let subst = Subst.create () in
   let subst = unify cs subst in
@@ -125,4 +125,3 @@ let infer cs expr =
   (*   (Sexp.to_string_hum (sexp_of_constrs cs)) *)
   (*   (Sexp.to_string_hum (Env.sexp_of_t env)) *)
   (*   (Subst.to_string subst); *)
-

@@ -16,7 +16,7 @@ let fold t ~init ~f =
     let a = f expr a in
     match expr with
     | Num _ | Var _ -> a
-    | Uop (_,expr) | Sub (expr,_,_) -> loop a expr
+    | Uop (_,expr) | Ind (expr,_,_) -> loop a expr
     | Bop (_,e1,e2) ->
       let a = loop a e1 in
       loop a e2 in
@@ -30,4 +30,3 @@ end
 include T
 include Comparable.Make(T)
 include Hashable.Make(T)
-
