@@ -81,6 +81,7 @@ term:
 decls:
   | decl {[$1]}
   | decl COMMA decls { $1::$3 }
+  | decl COMMA WHERE decls { $1::$4 }
   ;
 
 decl:

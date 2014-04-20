@@ -40,6 +40,7 @@ rule tokens = parse
   | lowercase as s {SYM s}
   | uppercase as s {SYM s}
   | integer as i {NUM i}
+  | "=" {EQUALS}
   | "+" {PLUS}
   | "-" {MINUS}
   | "*" {MUL}

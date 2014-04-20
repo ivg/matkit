@@ -78,7 +78,9 @@ let test_combinations () =
 let test_kinds () =
   print_parse "A is square.";
   print_parse "A, where A is square.";
-  print_parse "A*x+b, where A is square and invertible."
+  print_parse "A*x+b, where A is square and invertible,
+                      where x is horizontal,
+                            A is complex."
 
 let run_tests () =
   test_term ();
