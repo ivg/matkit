@@ -2,7 +2,7 @@ open Core.Std
 open Ast
 
 
-type parser_output = (exp option * (char * string) list) list
+type parser_output = (exp option * (char * string list) list) list
 with sexp
 
 (*** PARSE, EXTRACT, PRINT AST ***)
@@ -71,53 +71,21 @@ let test_combinations () =
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
     (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
     (Exp.(((Num (-4))*(tran(neg (Var "A"))))+((tran(Var "B"))-((neg (Var "C"))*(Num 4)))), 
-      "-4*~A'+B'-~C*4.")
+      "-4*~A'+B'-~C*4.");
+    (Exp.(tran (neg (tran (neg (Var "A" + Var "B"))))), "~(~(A+B)')'.")
   ]
   
-(*let test_term () =
-  printf "*** Testing Single Terms ***\n";
-  test_data [
-    "1.";
-    "a.";
-    "(1).";
-    "(a).";
-  ]
-  
-  let test_unop () =
-  printf "*** Testing Unary Operations ***\n";
-  test_data [
-    "~1.";  
-    "-1.";
-    "~a.";
-    "~(1).";
-    "~(a).";
-    "a`.";
-    "~a`.";
-    "(~a)`.";
-    "~~a``.";
-    "a'."
-  ]
-
-let test_binop () =
-  printf "*** Testing Binary Operations ***\n";
-  test_data [
-    "a + b.";
-    "a - b.";
-    "a + b - c.";
-    "a * b.";
-    "a .* b.";
-    "a * b + c.";
-    "(a + b) .* c.";
-    "~a * b.";
-    "~(a - b) * c.";
-    "~(4 * a) - (b + c)."
-  ]*)
+let test_kinds () =
+  print_parse "A is square.";
+  print_parse "A, where A is square.";
+  print_parse "A*x+b, where A is square and invertible."
 
 let run_tests () =
   test_term ();
   test_unop ();
   test_binop ();
-  test_combinations ()
+  test_combinations ();
+  test_kinds ()
 
 let () = run_tests ()
 

@@ -1,5 +1,6 @@
 %{
 open Ast
+open String
 %}
 
 (* keywords *)
@@ -25,7 +26,7 @@ open Ast
 %token <string> NUM
 
 %start script
-%type <(Ast.exp option * (char * string) list) list> script;
+%type <(Ast.exp option * (char * string list) list) list> script;
 
 %%
 
@@ -83,5 +84,20 @@ decls:
   ;
 
 decl:
-  | SYM IS KIND { ($1,$3) }
+  | SYM IS kinds { ($1,$3) }
   ;
+  
+kinds:
+  | kind           { [$1] }
+  | kind AND kinds { $1 :: $3 }
+  ;
+  
+kind: 
+  | str { concat_syms $1 }
+  ;
+  
+str:
+  | SYM     { [$1] }
+  | SYM str { $1 :: $2 } 
+  ;
+

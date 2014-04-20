@@ -53,6 +53,7 @@ rule tokens = parse
   | "\'" {TRAN}
   | "(" {LPAR}
   | ")" {RPAR}
+  | "," {COMMA}
   | "where" {WHERE}
   | "is"    {IS}
   | "and"   {AND}
