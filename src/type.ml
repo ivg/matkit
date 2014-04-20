@@ -1,17 +1,17 @@
 (** Type definitions for a typing phase.
 
-    Type of expression is defined as pair of two terms, where each
-    term specifies an input and output dimension of a matrix.
+    Type is a term. Term is either a type variable, constant or a pair
+    of terms [t1,t2], denoting a transformation from t2 to t1. But,
+    since all operations in our algebra are closed over matrices
+    (i.e., any operation on matrix returns a matrix) we can remove
+    reduntant variants and represent type as a pair of indices.
 
-    Dimension term is either a variable or a constant. No higher order
-    terms yet.
   *)
 
 open Core.Std
 open Ast
 
-(** type of an expression. A special kind of term, consisting only
-    from varialbles.  *)
+(** type of an expression.  *)
 type ty = index * index
 with sexp,compare
 
