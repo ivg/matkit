@@ -2,8 +2,11 @@
 
 open Core.Std
 
+let string_of_char = String.of_char 
+
 module Sym = String
 type sym = Sym.t with sexp,compare
+
 (** a type to represent symbol (still not sure what to use)  *)
 
 (** binary operations  *)

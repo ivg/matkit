@@ -19,7 +19,7 @@ open Parser
 (* id *)
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
-let kind = lowercase+
+let character = ['a'-'z' 'A'-'Z']
 
 (* numbers *)
 let digit = ['0'-'9']
@@ -27,26 +27,32 @@ let frac = '.' digit+
 let exp = ['e' 'E'] ['-' '+']? digit+
 let integer = '-'? digit+
 let decimal = digit* frac? exp?
+let kind = character+
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
 let space = ' ' | '\t'
-
-let apostrophe = '\''
 
 rule tokens = parse
   | eof {END}
   | space {tokens lexbuf}
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
-  | lowercase as s {SYM s}
-  | uppercase as s {SYM s}
+  | "where" {WHERE}
+  | "is"    {IS}
+  | "in"    {IN}
+  | "ring"  {RING}
+  | "and"   {AND}
+  | character as s {SYM s}
+  | kind as k {KIND k}
   | integer as i {NUM i}
+  | "=" {EQUALS}
   | "+" {PLUS}
   | "-" {MINUS}
   | "*" {MUL}
   | "/" {DIV}
   | ".*" {HAD}
+  | "./" {HDIV}
   | "^" {POW}
   | ".^" {HPOW}
   | "~" {NEG}
@@ -54,9 +60,7 @@ rule tokens = parse
   | "\'" {TRAN}
   | "(" {LPAR}
   | ")" {RPAR}
-  | "where" {WHERE}
-  | "is"    {IS}
-  | "and"   {AND}
+  | "," {COMMA}
   | "#" {comment lexbuf}
 and comment = parse
   | newline {new_line lexbuf; tokens lexbuf}

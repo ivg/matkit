@@ -3,7 +3,7 @@ open Ast
 %}
 
 (* keywords *)
-%token END DOT COMMA LPAR RPAR IS WHERE AND
+%token END DOT COMMA LPAR RPAR WHERE IS IN RING AND 
 
 (* operations *)
 %token PLUS MINUS
@@ -25,7 +25,7 @@ open Ast
 %token <string> NUM
 
 %start script
-%type <(Ast.exp option * (char * string) list) list> script;
+%type <(Ast.exp option * (char * string list) list) list> script;
 
 %%
 
@@ -72,13 +72,30 @@ term:
   | MUL             { Mul }
   | HAD             { Had }
   | POW             { Pow }
+(*  | DIV             { Div } *)
+(*  | HDIV            { HDiv } *)
+(*  | HPOW            { HPow } *)
   ;
 
 decls:
-  | decl {[$1]}
-  | decl COMMA decls { $1::$3 }
+  | decl                   { [$1] }
+  | decl COMMA decls       { $1::$3 }
+  | decl COMMA WHERE decls { $1::$4 }
   ;
 
 decl:
-  | SYM IS KIND { ($1,$3) }
+  | SYM IS kinds { ($1,$3) }
+  | SYM IN rings { ($1,$3) }
+  | SYM IN RING rings { ($1,$4) }
   ;
+  
+kinds:
+  | KIND           { [$1] }
+  | KIND AND kinds { $1 :: $3 }
+  ;
+  
+rings:
+  | SYM           { [string_of_char $1] }
+  | SYM AND rings { (string_of_char $1) :: $3 }
+  ;
+  
