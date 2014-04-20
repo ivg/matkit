@@ -2,10 +2,11 @@
 
 open Core.Std
 
+let string_of_char = String.of_char 
+
 module Sym = String
 type sym = Sym.t with sexp,compare
 
-let concat_syms syms = String.of_char_list syms
 (** a type to represent symbol (still not sure what to use)  *)
 
 (** binary operations  *)

@@ -1,10 +1,9 @@
 %{
 open Ast
-open String
 %}
 
 (* keywords *)
-%token END DOT COMMA LPAR RPAR IS WHERE AND
+%token END DOT COMMA LPAR RPAR WHERE IS IN RING AND 
 
 (* operations *)
 %token PLUS MINUS
@@ -79,26 +78,24 @@ term:
   ;
 
 decls:
-  | decl {[$1]}
-  | decl COMMA decls { $1::$3 }
+  | decl                   { [$1] }
+  | decl COMMA decls       { $1::$3 }
   | decl COMMA WHERE decls { $1::$4 }
   ;
 
 decl:
   | SYM IS kinds { ($1,$3) }
+  | SYM IN rings { ($1,$3) }
+  | SYM IN RING rings { ($1,$4) }
   ;
   
 kinds:
-  | kind           { [$1] }
-  | kind AND kinds { $1 :: $3 }
+  | KIND           { [$1] }
+  | KIND AND kinds { $1 :: $3 }
   ;
   
-kind: 
-  | str { concat_syms $1 }
+rings:
+  | SYM           { [string_of_char $1] }
+  | SYM AND rings { (string_of_char $1) :: $3 }
   ;
   
-str:
-  | SYM     { [$1] }
-  | SYM str { $1 :: $2 } 
-  ;
-

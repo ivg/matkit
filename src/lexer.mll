@@ -19,7 +19,7 @@ open Parser
 (* id *)
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
-let kind = lowercase+
+let character = ['a'-'z' 'A'-'Z']
 
 (* numbers *)
 let digit = ['0'-'9']
@@ -27,6 +27,7 @@ let frac = '.' digit+
 let exp = ['e' 'E'] ['-' '+']? digit+
 let integer = '-'? digit+
 let decimal = digit* frac? exp?
+let kind = character+
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
@@ -37,8 +38,13 @@ rule tokens = parse
   | space {tokens lexbuf}
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
-  | lowercase as s {SYM s}
-  | uppercase as s {SYM s}
+  | "where" {WHERE}
+  | "is"    {IS}
+  | "in"    {IN}
+  | "ring"  {RING}
+  | "and"   {AND}
+  | character as s {SYM s}
+  | kind as k {KIND k}
   | integer as i {NUM i}
   | "=" {EQUALS}
   | "+" {PLUS}
@@ -55,9 +61,6 @@ rule tokens = parse
   | "(" {LPAR}
   | ")" {RPAR}
   | "," {COMMA}
-  | "where" {WHERE}
-  | "is"    {IS}
-  | "and"   {AND}
   | "#" {comment lexbuf}
 and comment = parse
   | newline {new_line lexbuf; tokens lexbuf}
