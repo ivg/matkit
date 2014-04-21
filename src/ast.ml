@@ -2,7 +2,7 @@
 
 open Core.Std
 
-let string_of_char = String.of_char 
+let string_of_char = String.of_char
 
 module Sym = String
 type sym = Sym.t with sexp,compare
@@ -32,13 +32,13 @@ with sexp, compare
 
 
 (** a type to denote matrix indices  *)
-type index = INum of nat1      (** constant index    *)
-           | IVar of sym       (** variable index    *)
+type dim = INum of nat1      (** constant dim    *)
+         | IVar of sym       (** variable dim    *)
 with sexp, compare
 
-module Index = struct
+module Dim = struct
   module T = struct
-    type t = index with sexp,compare
+    type t = dim with sexp,compare
     let hash = Hashtbl.hash
   end
   include T
@@ -53,5 +53,13 @@ type exp =
   | Var of sym                                (** A variable        *)
   | Uop of unary  * exp                       (** Unary operation   *)
   | Bop of binary * exp * exp                 (** Binary operation  *)
-  | Ind of exp * index option * index option  (** Indexing  *)
+  | Ind of exp * dim option * dim option      (** Indexing  *)
 with sexp, compare, variants
+
+
+module Ring = struct
+  type t = Z | R | C
+end
+
+type kind = string
+type ring = Ring.t * (dim * dim) option

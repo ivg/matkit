@@ -3,7 +3,7 @@ open Ast
 %}
 
 (* keywords *)
-%token END DOT COMMA LPAR RPAR WHERE IS IN RING AND 
+%token END DOT COMMA LPAR RPAR WHERE IS IN RING AND
 
 (* operations *)
 %token PLUS MINUS
@@ -25,7 +25,7 @@ open Ast
 %token <string> NUM
 
 %start script
-%type <(Ast.exp option * (char * string list) list) list> script;
+%type <(Ast.exp option * ring option * kind list) list> script;
 
 %%
 
@@ -47,7 +47,7 @@ expr:
   | term                      { $1 }
   | expr INV                  { Bop(Pow, $1, Num (-1)) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
-  | t=term op=post_unop       { Uop(op, t) }  
+  | t=term op=post_unop       { Uop(op, t) }
   ;
 
 term:
@@ -60,7 +60,7 @@ term:
 %inline pre_unop:
   | NEG             { UNeg }
   ;
-  
+
 %inline post_unop:
   | TRAN            { Tran }
   | CONJ            { Conj }
@@ -88,14 +88,13 @@ decl:
   | SYM IN rings { ($1,$3) }
   | SYM IN RING rings { ($1,$4) }
   ;
-  
+
 kinds:
   | KIND           { [$1] }
   | KIND AND kinds { $1 :: $3 }
   ;
-  
+
 rings:
   | SYM           { [string_of_char $1] }
   | SYM AND rings { (string_of_char $1) :: $3 }
   ;
-  

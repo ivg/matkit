@@ -92,7 +92,7 @@ let substitute (f,t) x = if x = f then t else x
 
 
 module Subst = struct
-  include Index.Table
+  include Dim.Table
 
   let replace t s = map t ~f:(substitute s)
 
@@ -101,7 +101,7 @@ module Subst = struct
     replace t (t1,t2)
 
   let to_string t =
-    Sexp.to_string_hum (sexp_of_t sexp_of_index t)
+    Sexp.to_string_hum (sexp_of_t sexp_of_dim t)
 
 end
 

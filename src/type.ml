@@ -12,14 +12,14 @@ open Core.Std
 open Ast
 
 (** type of an expression.  *)
-type ty = index * index
+type ty = dim * dim
 with sexp,compare
 
 module Type =
   Comparable.Make(struct type t = ty with sexp,compare end)
 
 (** [i1,i2] constrains dimension [i1] to be equal to [i2] *)
-type constr = index * index
+type constr = dim * dim
 with sexp,compare
 
 (** list of constraints  *)

@@ -10,7 +10,7 @@ let nth_dim n =
     else sprintf "T_%d" (n-Array.length dims+1) in
   IVar sym
 
-module Set = Index.Set
+module Set = Dim.Set
 type t = Set.t list
 
 
