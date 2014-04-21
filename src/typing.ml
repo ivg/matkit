@@ -22,7 +22,7 @@ let generate_lexical_constraints env =
   let rec loop exp =
     match exp with
     | Num _ -> []
-    | Uop (_,e1) | Sub (e1,_,_) -> loop e1
+    | Uop (_,e1) | Ind (e1,_,_) -> loop e1
     | Bop (_,e1,e2) -> loop e1 @ loop e2
     | Var _ when Env.is_bound env exp -> []
     | Var s when is_lower s ->
@@ -69,7 +69,7 @@ let rec recon ctx expr : (ty * constrs) =
   match expr with
   | Num _ ->  tt,[lt,one; rt,one]
   | Var _ -> tt,[]
-  | Sub (s,i1,i2) ->
+  | Ind (s,i1,i2) ->
     let _,cs = recon ctx s in
     tt, List.concat [
       (match i1,i2 with

@@ -66,6 +66,13 @@ let () =
 
   let exp2 = Exp.(a * a - a * a) in
 
-  assert_type exp2 exp2 "N,N"
+  assert_type exp2 exp2 "N,N";
+
+  let exp3 = Exp.(a*b*c) in
+  assert_type exp3 exp3 "P,Q";
+  assert_type exp3 a "P,M";
+  assert_type exp3 b "M,N";
+  assert_type exp3 c "N,Q"
+
 
 
