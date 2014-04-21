@@ -13,17 +13,10 @@ let typeof exp subexp =
         (Exp.to_string subexp) (Exp.to_string exp) in
     invalid_arg msg
 
-let rec nat1_of_int = function
-  | 1 -> One
-  | n -> Succ (nat1_of_int (n-1))
-
-let rec int_of_nat1 = function
-  | One -> 1
-  | Succ n -> 1 + int_of_nat1 n
 
 let index_of_char char =
   match Char.get_digit char with
-  | Some n -> INum (nat1_of_int n)
+  | Some n -> INum (Nat1.of_int_exn n)
   | None   -> IVar (Char.to_string char)
 
 
@@ -34,7 +27,7 @@ let type_of_string str = match String.to_list str with
 
 let string_of_index = function
   | IVar v -> v
-  | INum n -> sprintf "%d" (int_of_nat1 n)
+  | INum n -> Nat1.to_string n
 
 let string_of_type = function
   | n, INum One -> string_of_index n
@@ -73,6 +66,3 @@ let () =
   assert_type exp3 a "P,M";
   assert_type exp3 b "M,N";
   assert_type exp3 c "N,Q"
-
-
-
