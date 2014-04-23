@@ -90,18 +90,25 @@ decl:
   ;
 
 kinds:
-  | syms           { [concat_char_list $1] }
-  | syms AND kinds { (concat_char_list $1) :: $3 }
+  | str           { [concat_char_list $1] }
+  | str AND kinds { (concat_char_list $1) :: $3 }
   ;
   
-syms:
-  | SYM            { [$1] }
-  | SYM syms       { $1 :: $2 }
+str:
+  | SYM           { [$1] }
+  | SYM str       { $1 :: $2 }
   
 ring:
-  | SYM IN ring_desc      { $3 }
-  | SYM IN RING ring_desc { $4 }
-
+  | SYM ring_decl ring_desc       { $3 }
+  | WHERE SYM ring_decl ring_desc { $4 }
+  
+ring_decl:
+  | IN            { () }
+  | IS IN         { () }
+  | IN RING       { () }
+  | IS IN RING    { () }
+  ;
+  
 ring_desc:  
   | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
   | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }

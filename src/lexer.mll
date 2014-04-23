@@ -31,17 +31,25 @@ let decimal = digit* frac? exp?
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
 let space = ' ' | '\t'
+let whitespace = (newline | space)*
+
+(* keywords *)
+let where = whitespace* " where " whitespace+
+let is = whitespace* " is " whitespace*
+let in_t = whitespace* " in " whitespace*
+let ring = whitespace* " ring " whitespace*
+let and_t = whitespace* " and " whitespace*
 
 rule tokens = parse
   | eof {END}
   | space {tokens lexbuf}
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
-  | "\bwhere\b" {WHERE}
-  | "\bis\b"    {IS}
-  | "\bin\b"    {IN}
-  | "\bring\b"  {RING}
-  | "\band\b"   {AND}
+  | where {WHERE}
+  | is    {IS}
+  | in_t  {IN}
+  | ring  {RING}
+  | and_t {AND}
   | character as s {SYM s}
   | integer as i {NUM i}
   | "=" {EQUALS}

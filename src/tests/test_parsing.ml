@@ -79,15 +79,14 @@ let test_kinds () =
   printf "*** Testing Kinds ***\n";
   print_parse "A is square.";
   print_parse "A, where A is square.";
-  print_parse "A*x+b, where A is square and invertible,
-                      where x is horizontal,
-                      A in ring Z."
+  print_parse "A*x+b, where A is square and invertible.";
+  print_parse "A*x+b, A in ring Z {m, n}."
 
 let run_tests () =
-  test_term ();
+  (*test_term ();
   test_unop ();
   test_binop ();
-  test_combinations ();
+  test_combinations ();*)
   test_kinds ()
 
 let () = run_tests ()
