@@ -14,7 +14,7 @@ let rec of_int_exn = function
 let to_int_exn init =
   let rec loop n nat =
     if n = Int.max_value
-    then invalid_arg "Number is to big"
+    then invalid_arg "Number is too big"
     else match nat with
       | One -> 1 + n
       | Succ nat -> loop (n+1) nat in

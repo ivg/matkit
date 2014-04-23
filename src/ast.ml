@@ -3,6 +3,7 @@
 open Core.Std
 
 let string_of_char = String.of_char
+let concat_char_list = String.of_char_list
 
 module Sym = String
 type sym = Sym.t with sexp,compare
@@ -11,11 +12,15 @@ type sym = Sym.t with sexp,compare
 
 (** binary operations  *)
 type binary =
-  | Mul        (** an overloaded multiplication  *)
-  | Sub        (** subtraction  *)
+  | Eql        (** Equality  *)
+  | Mul        (** Overloaded multiplication  *)
+  | Div        (** Division  *)
+  | Sub        (** Subtraction  *)
   | Add        (** Addition  *)
-  | Pow        (** Power *)
+  | Pow        (** Power  *)
   | Had        (** Hadamard multiplication  *)
+  | HDiv       (** Hadamard division  *)
+  | HPow       (** Hadamard power  *)
 with sexp, compare
 
 (** unary operations  *)
@@ -58,8 +63,22 @@ with sexp, compare, variants
 
 
 module Ring = struct
-  type t = Z | R | C
+  type t = Z | R | C with sexp
+  let ring_of_char c = 
+    match c with
+    | 'Z' | 'z' -> Z
+    | 'C' | 'c' -> C
+    | _ -> R
 end
 
-type kind = string
-type ring = Ring.t * (dim * dim) option
+type kind = (char * string) with sexp
+
+let rec kind_list_of_strings (sym: char) (lst: string list) =
+  match lst with
+  | [] -> []
+  | hd :: tl -> (sym, hd) :: kind_list_of_strings sym tl
+
+type ring = Ring.t * (dim * dim) option with sexp
+
+
+

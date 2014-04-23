@@ -2,7 +2,7 @@ open Core.Std
 open Ast
 
 
-type parser_output = (exp option * (char * string list) list) list
+type parser_output = (exp option * Ast.ring option * kind list) list
 with sexp
 
 (*** PARSE, EXTRACT, PRINT AST ***)
@@ -13,8 +13,8 @@ let parse x = Parser.script Lexer.tokens (Lexing.from_string x)
 
 let extract_exp (x: parser_output)  = 
   match x with
-  | [] | (None, _) :: _ -> failwith "No representation for empty exp\n"
-  | (Some e, _) :: _ -> e
+  | [] | (None, _, _) :: _ -> failwith "No representation for empty exp\n"
+  | (Some e, _, _) :: _ -> e
 
 let print_parse data =
   parse data
@@ -70,11 +70,11 @@ let test_combinations () =
     (Exp.(neg (Var "A") + Var "B"), "~A+B.");
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
     (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
-    (Exp.(((Num (-4))*(tran(neg (Var "A"))))+((tran(Var "B"))-((neg (Var "C"))*(Num 4)))), 
+    (Exp.((((Num (-4))*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4))), 
       "-4*~A'+B'-~C*4.");
     (Exp.(tran (neg (tran (neg (Var "A" + Var "B"))))), "~(~(A+B)')'.")
   ]
-  
+ 
 let test_kinds () =
   printf "*** Testing Kinds ***\n";
   print_parse "A is square.";

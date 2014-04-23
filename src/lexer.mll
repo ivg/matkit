@@ -27,7 +27,6 @@ let frac = '.' digit+
 let exp = ['e' 'E'] ['-' '+']? digit+
 let integer = '-'? digit+
 let decimal = digit* frac? exp?
-let kind = character+
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
@@ -38,13 +37,12 @@ rule tokens = parse
   | space {tokens lexbuf}
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
-  | "where" {WHERE}
-  | "is"    {IS}
-  | "in"    {IN}
-  | "ring"  {RING}
-  | "and"   {AND}
+  | "\bwhere\b" {WHERE}
+  | "\bis\b"    {IS}
+  | "\bin\b"    {IN}
+  | "\bring\b"  {RING}
+  | "\band\b"   {AND}
   | character as s {SYM s}
-  | kind as k {KIND k}
   | integer as i {NUM i}
   | "=" {EQUALS}
   | "+" {PLUS}
@@ -60,6 +58,8 @@ rule tokens = parse
   | "\'" {TRAN}
   | "(" {LPAR}
   | ")" {RPAR}
+  | "{" {LCUR}
+  | "}" {RCUR} 
   | "," {COMMA}
   | "#" {comment lexbuf}
 and comment = parse
