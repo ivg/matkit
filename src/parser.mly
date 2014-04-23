@@ -43,6 +43,7 @@ stmt:
   | decls DOT                       { (None, None, $1)}
   ;
 
+(*** EXPRESSIONS ***)
 expr:
   | term                      { $1 }
   | expr INV                  { Bop(Pow, $1, Num (-1)) }
@@ -78,6 +79,7 @@ term:
   | HPOW            { HPow }
   ;
 
+(*** DECLARATIONS ***)
 decls:
   | decl                   { $1 }
   | WHERE decl             { $2 }
@@ -93,33 +95,34 @@ kinds:
   | str           { [concat_char_list $1] }
   | str AND kinds { (concat_char_list $1) :: $3 }
   ;
-  
+
+(* strings are passed as a series of chars and must be reconstructed *)
 str:
   | SYM           { [$1] }
   | SYM str       { $1 :: $2 }
-  
+  ;
+
+(*** RINGS ***)
 ring:
-  | SYM ring_decl ring_desc       { $3 }
-  | WHERE SYM ring_decl ring_desc { $4 }
-  
-ring_decl:
-  | IN            { () }
-  | IS IN         { () }
-  | IN RING       { () }
-  | IS IN RING    { () }
+  | SYM IN ring_desc               { $3 }
+  | SYM IN RING ring_desc          { $4 }
+  | WHERE SYM IS IN ring_desc      { $5 }
+  | WHERE SYM IS IN RING ring_desc { $6 }
   ;
   
 ring_desc:  
-  | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
-  | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }
+  | SYM LPAR dims RPAR { (Ring.ring_of_char $1, Some $3) }
+  | LPAR dims RPAR     { (Ring.ring_of_char 'R', Some $2) }
   | SYM                { (Ring.ring_of_char $1, None) }
+  ;
   
 dims:
-  | dim COMMA dim { ($1, $3) }
   | dim           { ($1, INum (Nat1.of_int_exn 1)) }
+  | dim COMMA dim { ($1, $3) }
+  ;
   
 dim:
   | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
   | SYM { IVar (string_of_char $1) }
-   
+  ;
 

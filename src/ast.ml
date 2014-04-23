@@ -68,7 +68,8 @@ module Ring = struct
     match c with
     | 'Z' | 'z' -> Z
     | 'C' | 'c' -> C
-    | _ -> R
+    | 'R' | 'r' -> R 
+    | _ -> R (* should generate a warning at least *)
 end
 
 type kind = (char * string) with sexp
