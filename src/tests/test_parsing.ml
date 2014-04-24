@@ -70,7 +70,7 @@ let test_binop () =
     (Exp.(neg (Var "A") * (neg (Var "B"))), "~A~B.");
     (Exp.(tran (neg (Var "A")) * Var "B"), "~A'B.")
   ];
-  print_parse "A^BC-4."
+  print_parse "(A^2)C-A."
     
 let test_combinations () =
   printf "*** Testing Combined Operations ***\n";

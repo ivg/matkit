@@ -47,7 +47,7 @@ stmt:
 (*** EXPRESSIONS ***)
 expr:
   | term                      { $1 }
-  | expr expr                 { Bop(Mul, $1, $2) }
+  | expr term                 { Bop(Mul, $1, $2) }
   | expr INV                  { Bop(Pow, $1, Num (-1)) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
   | t=term op=post_unop       { Uop(op, t) }
