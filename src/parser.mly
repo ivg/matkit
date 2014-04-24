@@ -1,5 +1,6 @@
 %{
 open Ast
+open Exp
 %}
 
 (* punctuation and keywords *)
@@ -46,6 +47,7 @@ stmt:
 (*** EXPRESSIONS ***)
 expr:
   | term                      { $1 }
+  | expr expr                 { Bop(Mul, $1, $2) }
   | expr INV                  { Bop(Pow, $1, Num (-1)) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
   | t=term op=post_unop       { Uop(op, t) }
@@ -111,8 +113,8 @@ ring:
   ;
   
 ring_desc:  
-  | SYM LPAR dims RPAR { (Ring.ring_of_char $1, Some $3) }
-  | LPAR dims RPAR     { (Ring.ring_of_char 'R', Some $2) }
+  | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
+  | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }
   | SYM                { (Ring.ring_of_char $1, None) }
   ;
   

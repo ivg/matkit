@@ -40,7 +40,7 @@ let test_term () =
   test_parses [ 
     (Exp.(Var "A"), "A.");
     (Exp.(Var "a"), "a.");
-    (Exp.(Num (-1)), "-1.");
+    (Exp.(neg (Num 1)), "~1.");
     (Exp.(Var "A"), "(A).")
   ]
   
@@ -59,10 +59,18 @@ let test_binop () =
     (Exp.(Var "A" + Var "B"), "A+B.");
     (Exp.(Var "A" - Var "B"), "A-B.");
     (Exp.(Var "A" * Var "B"), "A*B.");
+    (Exp.(Var "A" /. Var "B"), "A./B.");
     (Exp.(Var "A" *. Var "B"), "A.*B.");
+    (Exp.(Var "A" ** Num 2), "A^2.");
+    (Exp.(Var "A" **. Var "B"), "A.^B.");
     (Exp.(Var "A" + (Var "B" * Var "C")), "A+B*C.");
-    (Exp.(Var "A" * Var "B" + Var "C"),  "A*B+C.")
-  ]
+    (Exp.(Var "A" * Var "B" + Var "C"),  "A*B+C.");
+    (Exp.(Var "A" + (Var "B" * (Var "C" ** Var "D"))), "A+B*C^D.");
+    (Exp.(Var "A" * Var "B"), "AB.");
+    (Exp.(neg (Var "A") * (neg (Var "B"))), "~A~B.");
+    (Exp.(tran (neg (Var "A")) * Var "B"), "~A'B.")
+  ];
+  print_parse "A^BC-4."
     
 let test_combinations () =
   printf "*** Testing Combined Operations ***\n";
@@ -70,8 +78,8 @@ let test_combinations () =
     (Exp.(neg (Var "A") + Var "B"), "~A+B.");
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
     (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
-    (Exp.((((Num (-4))*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4))), 
-      "-4*~A'+B'-~C*4.");
+    (Exp.(((neg (Num 4)*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4))), 
+      "~4*~A'+B'-~C*4.");
     (Exp.(tran (neg (tran (neg (Var "A" + Var "B"))))), "~(~(A+B)')'.")
   ]
  
@@ -80,13 +88,16 @@ let test_kinds () =
   print_parse "A is square.";
   print_parse "A, where A is square.";
   print_parse "A*x+b, where A is square and invertible.";
-  print_parse "A*x+b, where A is in (m, n)."
+  print_parse "A*x+b, where A is in ring R {m}.";
+  print_parse "A^4, A in R {m, n},
+                    A is invertible,
+                    where A is square and symmetric."
 
 let run_tests () =
-  (*test_term ();
+  test_term ();
   test_unop ();
   test_binop ();
-  test_combinations ();*)
+  test_combinations ();
   test_kinds ()
 
 let () = run_tests ()

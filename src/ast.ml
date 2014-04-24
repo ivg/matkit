@@ -2,9 +2,6 @@
 
 open Core.Std
 
-let string_of_char = String.of_char
-let concat_char_list = String.of_char_list
-
 module Sym = String
 type sym = Sym.t with sexp,compare
 
@@ -73,11 +70,6 @@ module Ring = struct
 end
 
 type kind = (char * string) with sexp
-
-let rec kind_list_of_strings (sym: char) (lst: string list) =
-  match lst with
-  | [] -> []
-  | hd :: tl -> (sym, hd) :: kind_list_of_strings sym tl
 
 type ring = Ring.t * (dim * dim) option with sexp
 

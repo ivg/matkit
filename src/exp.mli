@@ -24,5 +24,10 @@ val to_string: t -> string
 
 val fold: t -> init:'a -> f:(t -> 'a -> 'a) -> 'a
 
+(* Helper functions for parser.mly *)
+val string_of_char: char -> string
+val concat_char_list: char list -> string
+val kind_list_of_strings: char -> string list -> kind list
+
 include Hashable.S with type t := t
 include Comparable.S with type t := t

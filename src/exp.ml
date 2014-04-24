@@ -15,6 +15,14 @@ let tran t = Uop (Tran, t)
 let conj t = Uop (Conj, t)
 let to_string t = Sexp.to_string_hum (sexp_of_exp t)
 
+let rec kind_list_of_strings (sym: char) (lst: string list) =
+  match lst with
+  | [] -> []
+  | hd :: tl -> (sym, hd) :: kind_list_of_strings sym tl
+  
+let string_of_char = String.of_char
+let concat_char_list = String.of_char_list
+
 let fold t ~init ~f =
   let rec loop a expr =
     let a = f expr a in

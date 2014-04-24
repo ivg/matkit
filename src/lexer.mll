@@ -25,7 +25,7 @@ let character = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let frac = '.' digit+
 let exp = ['e' 'E'] ['-' '+']? digit+
-let integer = '-'? digit+
+let integer = digit+
 let decimal = digit* frac? exp?
 
 (* whitespace *)
@@ -34,11 +34,13 @@ let space = ' ' | '\t'
 let whitespace = (newline | space)*
 
 (* keywords *)
-let where = whitespace* " where " whitespace+
-let is = whitespace* " is " whitespace*
-let in_t = whitespace* " in " whitespace*
-let ring = whitespace* " ring " whitespace*
-let and_t = whitespace* " and " whitespace*
+(* current definition is not sufficient, reimplement
+ * after word break sign is worked out *)
+let where = "where "
+let is = "is " 
+let in_t = "in "
+let ring = "ring " 
+let and_t = "and " 
 
 rule tokens = parse
   | eof {END}
