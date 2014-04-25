@@ -20,6 +20,8 @@ open Exp
 %left PLUS MINUS
 %left MUL DIV HAD HDIV
 %left POW HPOW
+%nonassoc INV TRAN CONJ
+%nonassoc UNEG
 
 %token <string> NUM
 %token <char> SYM
@@ -47,26 +49,18 @@ stmt:
 (*** EXPRESSIONS ***)
 expr:
   | term                      { $1 }
-  | expr term                 { Bop(Mul, $1, $2) }
-  | expr INV                  { Bop(Pow, $1, Num (-1)) }
+  | term expr %prec MUL       { Bop(Mul, $1, $2) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
-  | t=term op=post_unop       { Uop(op, t) }
   ;
 
 term:
-  | op=pre_unop t=term  { Uop(op, t) }
-  | LPAR expr RPAR      { $2 }
-  | SYM                 { Exp.var $1 }
-  | NUM                 { Num (int_of_string $1) }
-  ;
-
-%inline pre_unop:
-  | NEG             { UNeg }
-  ;
-
-%inline post_unop:
-  | TRAN            { Tran }
-  | CONJ            { Conj }
+  | LPAR expr RPAR         { $2 }
+  | SYM                    { Exp.var $1 }
+  | NUM                    { Num (int_of_string $1) }
+  | NEG t=term  %prec UNEG { Uop(UNeg, t) }
+  | t=term INV             { Bop(Pow, t, Num (-1)) }
+  | t=term TRAN            { Uop(Tran, t) }
+  | t=term CONJ            { Uop(Conj, t) }
   ;
 
 %inline binop:
@@ -111,18 +105,18 @@ ring:
   | WHERE SYM IS IN ring_desc      { $5 }
   | WHERE SYM IS IN RING ring_desc { $6 }
   ;
-  
-ring_desc:  
+
+ring_desc:
   | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
   | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }
   | SYM                { (Ring.ring_of_char $1, None) }
   ;
-  
+
 dims:
   | dim           { ($1, INum (Nat1.of_int_exn 1)) }
   | dim COMMA dim { ($1, $3) }
   ;
-  
+
 dim:
   | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
   | SYM { IVar (string_of_char $1) }
