@@ -45,6 +45,7 @@ let assert_type_error ?decl exp =
 
 
 let ring s = Ring (Ring.R, Some (type_of_string s))
+let kind k = Kind k
 
 let () =
   try
@@ -66,6 +67,8 @@ let () =
     let exp2 = Exp.(a * a - a * a) in
 
     assert_type exp2 exp2 "N,N";
+    assert_type exp2 exp2 "1" ~decl:["A", ring "1"];
+    assert_type exp2 exp2 "1" ~decl:["A", kind "scalar"];
 
     let exp3 = Exp.(a*b*c) in
     assert_type exp3 exp3 "P,Q";
