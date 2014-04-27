@@ -14,10 +14,11 @@ let typeof exp subexp =
     invalid_arg msg
 
 
-let index_of_char char =
-  match Char.get_digit char with
+let index_of_char c =
+  match Char.get_digit c with
   | Some n -> INum (Nat1.of_int_exn n)
-  | None   -> IVar (Char.to_string char)
+  | None when Char.is_lowercase c -> IVar (Char.to_string c)
+  | None -> IConst (Char.to_string c)
 
 
 let type_of_string str = match String.to_list str with
@@ -34,7 +35,7 @@ let string_of_type = function
   | n, m -> string_of_index n ^ "," ^ string_of_index m
 
 
-let assert_type  exp subexp texp =
+let assert_type exp subexp texp =
   let ty1 = typeof exp subexp in
   let ty2 = type_of_string texp in
   let eq = Type.(ty1 = ty2) in
