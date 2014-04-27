@@ -4,7 +4,7 @@ open Debug
 
 
 module Set = Dim.Set
-type t = Set.t list
+type t = Set.t list with sexp
 
 
 
@@ -45,7 +45,11 @@ let find t x : dim =
   match List.findi vars ~f:(fun _ ss -> Set.mem ss x) with
   | Some (n,_) -> nth_dim nums n
   | None -> match List.find nums ~f:(fun ss -> Set.mem ss x) with
-    | None -> raise Not_found
+    | None ->
+      eprintf "Failed to find %s in\n%s\n"
+        (Dim.to_string x)
+        (Sexp.to_string_hum (sexp_of_t t));
+      raise Not_found
     | Some ss -> match Set.to_list (Set.filter ss ~f:is_const) with
       | [] -> assert false
       | [r] -> r

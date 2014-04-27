@@ -36,19 +36,21 @@ let lexical_constraints env script =
   List.concat
 
 (** adds user's ring constraints to the typing environment  *)
-let init_env (script : script) =
-  let env = Env.empty () in
-  List.iter script ~f:(fun (_exp,decls) ->
-      List.iter decls ~f:(fun (sym,prop) ->
+let user_constraints env (script : script) =
+  List.map script ~f:(fun (_exp,decls) ->
+      List.map decls ~f:(fun (sym,prop) ->
           match prop with
-          | Kind _ | Ring (_,None) -> ()
-          | Ring (_, Some ty) -> Env.add env (Var sym) ty));
-  env
+          | Kind _ | Ring (_,None) -> []
+          | Ring (_, Some (t1,t2)) ->
+            let (ld,rd) = Env.get_or_add_fresh env (Var sym) in
+            [ld,t1; rd,t2]))
+  |> List.concat |> List.concat
 
 (** [init exp constraints] initialize an environment from the
     expression [exp] with respect to user constraints *)
 let init (script : script) =
-  let env = init_env script in
+  let env = Env.empty () in
+  let ucs = user_constraints env script in
   let cs = List.map script ~f:(fun (_,decl) ->
       List.map decl ~f:(fun (sym,property) -> match property with
           | Ring _ -> []
@@ -62,7 +64,7 @@ let init (script : script) =
               eprintf "Warning> unknown property %s\n" s;
               [])) |>
            List.concat in
-  env, List.concat (lexical_constraints env script :: cs)
+  env, List.concat (lexical_constraints env script :: ucs :: cs)
 
 (** [binary_constr t1 t2 t3 op] given an expression $A `op` B = C$,
     with [A:t1, B:t2, C:t3] generate constraint according to
@@ -121,7 +123,10 @@ let type_error (d1,d2) = raise (Type_error (d1,d2))
 
 let swap (a,b) = (b,a)
 
-let rec unify cs subst = match cs with
+let rec unify cs subst =
+  (* eprintf "step: \n%s\n\n" (Sexp.to_string_hum *)
+  (*                                     (sexp_of_constrs cs)); *)
+  match cs with
   | [] -> subst
   | (x,y)::cs when x = y -> unify cs subst
   | ((IConst _, IConst _) as ty) :: _
@@ -129,7 +134,7 @@ let rec unify cs subst = match cs with
   | ((INum _,   IConst _ )  as ty) :: _
   | ((INum _,   INum _)     as ty) :: _ -> type_error ty
   | ((IConst _ |INum _),IVar _) as c::cs -> unify (swap c :: cs) subst
-  | (lhs,rhs)::cs -> match Subst.find subst lhs with
+  | (IVar _ as lhs,rhs)::cs -> match Subst.find subst lhs with
     | None -> unify cs (Subst.extend_replace subst (lhs,rhs))
     | Some v -> unify ((rhs,v) :: cs) subst
 
@@ -141,6 +146,10 @@ let infer (script : script) : subst =
   let cs = List.concat (ucs :: cs) |>
            List.sort ~cmp:compare  |>
            List.dedup in
+  (* eprintf "type environment is:\n%s\n" (Sexp.to_string_hum *)
+  (*                                         (Env.sexp_of_t env)); *)
+  (* eprintf "constraints are \n%s\n" (Sexp.to_string_hum *)
+  (*                                     (sexp_of_constrs cs)); *)
   let subst = Subst.create () in
   let subst = unify cs subst in
   let ds = Subst.fold subst ~init:(UnionFind.create ())
