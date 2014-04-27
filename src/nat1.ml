@@ -1,14 +1,19 @@
 open Core.Std
-open Ast
 
 module T = struct
-  type t = nat1 with sexp,compare
+  type t = One
+         | Succ of t
+  with sexp, compare
   let hash = Hashtbl.hash
 end
 
+include T
+
+let one = One
+
 let rec of_int_exn = function
   | n when n <= 0 -> invalid_arg "nat1 should be positive"
-  | 1 -> One
+  | 1 -> one
   | n -> Succ (of_int_exn (n-1))
 
 let to_int_exn init =
@@ -23,6 +28,5 @@ let to_int_exn init =
 let to_string n = Int.to_string (to_int_exn n)
 let of_string s = Int.of_string s |> of_int_exn
 
-include T
 include Comparable.Make(T)
 include Hashable.Make(T)

@@ -2,7 +2,7 @@ open Core.Std
 open Ast
 open Type
 
-let one = INum One
+let one = INum Nat1.one
 
 (** generate variable type according to a constrained provied by a
     user *)

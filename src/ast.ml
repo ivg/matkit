@@ -28,19 +28,13 @@ type unary =
 with sexp, compare
 
 (** positive natural numbers  *)
-type nat1 = One
-          | Succ of nat1
-with sexp, compare
-
+type nat1 = Nat1.t with sexp,compare
 
 (** a type to denote matrix indices  *)
 type dim = INum of nat1      (** constant dim    *)
          | IVar of sym       (** variable dim    *)
          | IConst of sym     (** rigid dim       *)
 with sexp, compare
-
-
-
 
 (** AST type *)
 type exp =

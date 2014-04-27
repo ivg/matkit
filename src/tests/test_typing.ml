@@ -13,14 +13,16 @@ let typeof exp subexp =
         (Exp.to_string subexp) (Exp.to_string exp) in
     invalid_arg msg
 
+let one = INum Nat1.one
+
 let type_of_string str =
   match String.split ~on:',' str with
-  | [n] -> Dim.of_string n, INum One
+  | [n] -> Dim.of_string n, one
   | [n; m] -> Dim.of_string n, Dim.of_string m
   | _  -> invalid_arg "type := n,m | n"
 
 let string_of_type = function
-  | n, INum One -> Dim.to_string n
+  | n, one -> Dim.to_string n
   | n, m -> Dim.to_string n ^ "," ^ Dim.to_string m
 
 

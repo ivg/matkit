@@ -1,7 +1,7 @@
 open Core.Std
-open Ast
 
-type t = nat1 with sexp,compare
+type t with sexp,compare
+val one: t
 include Intable    with type t := t
 include Hashable   with type t := t
 include Comparable with type t := t
