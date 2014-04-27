@@ -28,8 +28,6 @@ let is_var = function
   | IConst _ | INum _ -> false
 
 let is_const v = not (is_var v)
-
-let has_vars ss = Set.exists ss ~f:is_var
 let has_consts ss = Set.exists ss ~f:is_const
 
 exception Type_error of dim * dim with sexp

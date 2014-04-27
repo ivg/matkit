@@ -22,7 +22,7 @@ let type_of_string str =
   | _  -> invalid_arg "type := n,m | n"
 
 let string_of_type = function
-  | n, one -> Dim.to_string n
+  | n, INum m when Nat1.(m = one) -> Dim.to_string n
   | n, m -> Dim.to_string n ^ "," ^ Dim.to_string m
 
 
@@ -40,7 +40,7 @@ let assert_type exp subexp texp =
 
 
 let () =
-  let x,y,z = Exp.(var 'x', var 'y', var 'z') in
+  let x,_,_ = Exp.(var 'x', var 'y', var 'z') in
   let a,b,c = Exp.(var 'A', var 'B', var 'C') in
   let _2,_3 = Exp.(num 2, num 3) in
   let exp1 = Exp.(tran x * a * x) in

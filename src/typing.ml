@@ -101,10 +101,6 @@ module Subst = struct
   let extend_replace t (t1,t2) =
     add_exn t ~key:t1 ~data:t2;
     replace t (t1,t2)
-
-  let to_string t =
-    Sexp.to_string_hum (sexp_of_t sexp_of_dim t)
-
 end
 
 let is_var = function

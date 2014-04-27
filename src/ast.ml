@@ -4,8 +4,7 @@ open Core.Std
 
 module Sym = String
 type sym = Sym.t with sexp,compare
-
-(** a type to represent symbol (still not sure what to use)  *)
+(** a type to represent a symbol (still not sure what to use)  *)
 
 (** binary operations  *)
 type binary =
@@ -43,8 +42,7 @@ type exp =
   | Uop of unary  * exp                       (** Unary operation   *)
   | Bop of binary * exp * exp                 (** Binary operation  *)
   | Ind of exp * dim option * dim option      (** Indexing  *)
-with sexp, compare, variants
-
+with sexp, compare
 
 module Ring = struct
   type t = Z | R | C with sexp
