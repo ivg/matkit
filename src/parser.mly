@@ -1,6 +1,10 @@
 %{
 open Ast
 open Exp
+
+let kind_list_of_strings (sym: char) (lst: string list) =
+  List.map (fun prop -> (sym,prop)) lst
+
 %}
 
 (* punctuation and keywords *)
@@ -25,7 +29,7 @@ open Exp
 %token <char> SYM
 
 %start script
-%type <(Ast.exp option * Ast.ring option * Ast.kind list) list> script;
+%type < Ast.script > script;
 
 %%
 
@@ -94,8 +98,8 @@ decl:
   ;
 
 kinds:
-  | str           { [concat_char_list $1] }
-  | str AND kinds { (concat_char_list $1) :: $3 }
+  | str           { [Sym.char_list $1] }
+  | str AND kinds { (Sym.char_list $1) :: $3 }
   ;
 
 (* strings are passed as a series of chars and must be reconstructed *)
@@ -111,20 +115,20 @@ ring:
   | WHERE SYM IS IN ring_desc      { $5 }
   | WHERE SYM IS IN RING ring_desc { $6 }
   ;
-  
-ring_desc:  
+
+ring_desc:
   | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
   | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }
   | SYM                { (Ring.ring_of_char $1, None) }
   ;
-  
+
 dims:
   | dim           { ($1, INum (Nat1.of_int_exn 1)) }
   | dim COMMA dim { ($1, $3) }
   ;
-  
+
 dim:
   | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
-  | SYM { IVar (string_of_char $1) }
+  | SYM { IVar (Sym.of_char $1) }
   ;
 
