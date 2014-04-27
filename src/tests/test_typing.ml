@@ -26,7 +26,7 @@ let type_of_string str = match String.to_list str with
   | _  -> invalid_arg "type := n,m | n"
 
 let string_of_index = function
-  | IVar v -> v
+  | IVar v | IConst v -> v
   | INum n -> Nat1.to_string n
 
 let string_of_type = function

@@ -30,18 +30,26 @@ let union t s1 s2 : t =
   | None, Some ss -> Set.add ss s1 :: remove ss t
   | None, None -> Set.add (Set.singleton s1) s2 :: t
 
-let is_number = function
-  | IVar _ -> false
-  | INum _ -> true
+let is_var = function
+  | IVar _ -> true
+  | IConst _ | INum _ -> false
 
-let has_numbers ss = Set.exists ss ~f:is_number
+let is_const v = not (is_var v)
+
+let has_vars ss = Set.exists ss ~f:is_var
+let has_consts ss = Set.exists ss ~f:is_const
+
+exception Type_error of dim * dim with sexp
+
+let type_error d1 d2 = raise (Type_error (d1,d2))
 
 let find t x =
-  let nums,vars = List.partition_tf t ~f:has_numbers in
+  let nums,vars = List.partition_tf t ~f:has_consts in
   match List.findi vars ~f:(fun _ ss -> Set.mem ss x) with
   | Some (n,_) -> nth_dim n
   | None -> match List.find nums ~f:(fun ss -> Set.mem ss x) with
     | None -> raise Not_found
-    | Some ss -> match Set.to_list (Set.filter ss ~f:is_number) with
-      | [idx] -> idx
-      | _ -> assert false
+    | Some ss -> match Set.to_list (Set.filter ss ~f:is_const) with
+      | [] -> assert false
+      | [r] -> r
+      | r1::r2::_ -> type_error r1 r2

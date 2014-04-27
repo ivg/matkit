@@ -10,18 +10,28 @@ let empty () : t = Table.create ()
 
 let min_sym = 'a'
 
-(** a stub to generate fresh type variables  *)
+(** [next_char c] returns next a lowercase character following the
+    [c], if it exists   *)
 let next_char char : char option =
   match (Char.to_int char + 1) |> Char.of_int with
   | Some c when Char.(is_lowercase c && is_alpha c) -> Some c
   | _ -> None
 
+(** [next_sym s] generates new fresh symbol, assuming that s is the
+    highest generated symbol.
+    The function will at first use all lowercase symbols from [[a-z]],
+    and then fall back to a simple scheme [t_n], where n goes from
+    zero to infinity.
+*)
 let next_sym sym : sym =
-  match Sym.to_list sym |> List.rev with
-  | [] -> assert false
-  | t::hs -> match next_char t with
-    | Some t -> List.rev (t::hs) |> Sym.of_char_list
-    | None   -> min_sym :: t :: hs |> List.rev |> Sym.of_char_list
+  match Sym.split sym ~on:'_' with
+  | [v] when Sym.length v = 1 ->
+    (match next_char v.[0] with
+     | Some c -> Sym.of_char c
+     | None -> "t_0")
+  | [v;n] -> let m = Int.of_string n + 1 in
+    sprintf "%s_%d" v m
+  | _ -> assert false
 
 let add_fresh (env : t) sym : ty =
   let fresh_var =
@@ -30,7 +40,7 @@ let add_fresh (env : t) sym : ty =
         ~f:(fun ~key:_ ~data s0 -> match data with
             | IVar s1, IVar s2 -> Sym.max s0 (Sym.max s1 s2)
             | IVar s1,_|_,IVar s1 -> Sym.max s1 s0
-            | INum _, INum _ -> s0) in
+            | _  -> s0) in
     let i1 = next_sym max_var in
     IVar i1, IVar (next_sym i1) in
   let ty = fresh_var in

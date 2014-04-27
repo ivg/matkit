@@ -54,8 +54,10 @@ let init exp cs =
     operation [op] *)
 let binary_constr (l1,r1) (l2,r2) (l3,r3) = function
   | Mul -> [l1,l3; r2,r3; r1,l2]
-  | Sub|Add|Had -> [l1,l2; l1,l3; l2,l3; r1,r2; r1,r3; r2,r3;]
+  | Eql|HDiv|HPow|Sub|Add|Had ->
+    [l1,l2; l1,l3; l2,l3; r1,r2; r1,r3; r2,r3;]
   | Pow -> [l1,r1; l3,r3; l1,r1; l2,one; r2,one]
+  | Div -> [l1,one; r1,one; l2,one; r2,one; l3,one; r3,one]
 
 (** impose constraints on unary expression  *)
 let unary_constr (l1,r1) (l2,r2) = function
@@ -105,17 +107,12 @@ module Subst = struct
 
 end
 
-
-
-exception Type_error of nat1 * nat1 with sexp
-
 let is_var = function
   | IVar _ -> true
-  | INum _ -> false
+  | INum _ | IConst _ -> false
 
 let rec unify cs subst = match cs with
   | [] -> subst
-  | (INum n, INum m)::_ when n <> m -> raise (Type_error (n,m))
   | (x,y)::cs when x = y -> unify cs subst
   | (x,y)::cs when not (is_var x) -> unify ((y,x)::cs) subst
   | (lhs,rhs)::cs -> match Subst.find subst lhs with
@@ -124,7 +121,7 @@ let rec unify cs subst = match cs with
 
 let infer cs expr =
   let env,ucs = init (Some expr) cs in
-  let ty,cs = recon env expr in
+  let _,cs = recon env expr in
   let cs = cs @ ucs |> List.sort ~cmp:compare |> List.dedup in
   let subst = Subst.create () in
   let subst = unify cs subst in

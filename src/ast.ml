@@ -36,6 +36,7 @@ with sexp, compare
 (** a type to denote matrix indices  *)
 type dim = INum of nat1      (** constant dim    *)
          | IVar of sym       (** variable dim    *)
+         | IConst of sym     (** rigid dim       *)
 with sexp, compare
 
 module Dim = struct
@@ -61,11 +62,11 @@ with sexp, compare, variants
 
 module Ring = struct
   type t = Z | R | C with sexp
-  let ring_of_char c = 
+  let ring_of_char c =
     match c with
     | 'Z' | 'z' -> Z
     | 'C' | 'c' -> C
-    | 'R' | 'r' -> R 
+    | 'R' | 'r' -> R
     | _ -> R (* should generate a warning at least *)
 end
 
