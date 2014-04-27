@@ -13,26 +13,15 @@ let typeof exp subexp =
         (Exp.to_string subexp) (Exp.to_string exp) in
     invalid_arg msg
 
-
-let index_of_char c =
-  match Char.get_digit c with
-  | Some n -> INum (Nat1.of_int_exn n)
-  | None when Char.is_lowercase c -> IVar (Char.to_string c)
-  | None -> IConst (Char.to_string c)
-
-
-let type_of_string str = match String.to_list str with
-  | [n] -> index_of_char n, INum One
-  | [n; ','; m] -> index_of_char n, index_of_char m
+let type_of_string str =
+  match String.split ~on:',' str with
+  | [n] -> Dim.of_string n, INum One
+  | [n; m] -> Dim.of_string n, Dim.of_string m
   | _  -> invalid_arg "type := n,m | n"
 
-let string_of_index = function
-  | IVar v | IConst v -> v
-  | INum n -> Nat1.to_string n
-
 let string_of_type = function
-  | n, INum One -> string_of_index n
-  | n, m -> string_of_index n ^ "," ^ string_of_index m
+  | n, INum One -> Dim.to_string n
+  | n, m -> Dim.to_string n ^ "," ^ Dim.to_string m
 
 
 let assert_type exp subexp texp =

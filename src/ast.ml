@@ -39,15 +39,7 @@ type dim = INum of nat1      (** constant dim    *)
          | IConst of sym     (** rigid dim       *)
 with sexp, compare
 
-module Dim = struct
-  module T = struct
-    type t = dim with sexp,compare
-    let hash = Hashtbl.hash
-  end
-  include T
-  include Comparable.Make(T)
-  include Hashable.Make(T)
-end
+
 
 
 (** AST type *)
