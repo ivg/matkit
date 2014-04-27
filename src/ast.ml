@@ -45,7 +45,7 @@ type exp =
 with sexp, compare
 
 module Ring = struct
-  type t = Z | R | C with sexp
+  type t = Z | R | C with sexp,compare
   let ring_of_char c =
     match c with
     | 'Z' | 'z' -> Z
@@ -54,9 +54,18 @@ module Ring = struct
     | _ -> R (* should generate a warning at least *)
 end
 
-type kind = (char * string) with sexp
+type property =
+  | Kind of string
+  | Ring of Ring.t * (dim * dim) option
+with sexp,compare
 
-type ring = Ring.t * (dim * dim) option with sexp
+type decls = (Sym.t,property) List.Assoc.t
+with sexp,compare
 
+type stmt = exp option * decls
+with sexp,compare
 
+type script = stmt list with sexp,compare
+
+exception Type_error of dim * dim with sexp
 

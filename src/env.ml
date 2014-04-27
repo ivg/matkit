@@ -8,8 +8,6 @@ type t = ty Table.t with sexp
 
 let empty () : t = Table.create ()
 
-let min_sym = 'a'
-
 (** [next_char c] returns next a lowercase character following the
     [c], if it exists   *)
 let next_char char : char option =
@@ -17,35 +15,38 @@ let next_char char : char option =
   | Some c when Char.(is_lowercase c && is_alpha c) -> Some c
   | _ -> None
 
-(** [next_sym s] generates new fresh symbol, assuming that s is the
-    highest generated symbol.
-    The function will at first use all lowercase symbols from [[a-z]],
-    and then fall back to a simple scheme [t_n], where n goes from
-    zero to infinity.
+(** [next_sym s] generates new fresh symbol, assuming that [s] is the
+    highest generated symbol.  The function will at first use all
+    lowercase symbols from [[a-z]], and then fall back to a simple
+    scheme [t_n], where n goes from zero to infinity.
 *)
 let next_sym sym : sym =
   match Sym.split sym ~on:'_' with
   | [v] when Sym.length v = 1 ->
     (match next_char v.[0] with
      | Some c -> Sym.of_char c
-     | None -> "t_0")
+     | None -> "t_1")
   | [v;n] -> let m = Int.of_string n + 1 in
     sprintf "%s_%d" v m
   | _ -> assert false
+
+let min_sym = 'a'
+
+let add env sym ty = Table.add_exn env ~key:sym ~data:ty
 
 let add_fresh (env : t) sym : ty =
   let fresh_var =
     let max_var =
       Table.fold env ~init:(Sym.of_char min_sym)
-        ~f:(fun ~key:_ ~data s0 -> match data with
-            | IVar s1, IVar s2 -> Sym.max s0 (Sym.max s1 s2)
-            | IVar s1,_|_,IVar s1 -> Sym.max s1 s0
+        ~f:(fun ~key:_ ~data:(d1,d2) s0 ->
+            match List.filter [d1;d2] ~f:Dim.is_var with
+            | [d1;d2] -> Sym.max s0 (Dim.to_sym (Dim.max d1 d2))
+            | [d1] -> Sym.max (Dim.to_sym d1) s0
             | _  -> s0) in
     let i1 = next_sym max_var in
     IVar i1, IVar (next_sym i1) in
-  let ty = fresh_var in
-  Table.add_exn env ~key:sym ~data:ty;
-  ty
+  add env sym fresh_var;
+  fresh_var
 
 let get_or_add_fresh (env:t) sym : ty =
   match Table.find env sym with
@@ -55,6 +56,19 @@ let get_or_add_fresh (env:t) sym : ty =
 
 let find env = Table.find env
 let is_bound env = Table.mem env
+
+let is_num = function
+  | INum _ -> true
+  | _ -> false
+
+let has_sym d = not (is_num d)
+
+let bound_dims env =
+  List.fold (Table.data env) ~init:Dim.Set.empty ~f:(fun s (d1,d2) ->
+      match List.filter [d1;d2] ~f:has_sym with
+      | [s1;s2] -> Set.add (Set.add s s1) s2
+      | [s1] -> Set.add s s1
+      | _ -> s)
 
 let create_substitution env ds  =
   let module Map = Exp.Map in

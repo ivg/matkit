@@ -1,4 +1,5 @@
 open Core.Std
+open Debug
 open Ast
 open Type
 
@@ -18,36 +19,50 @@ let is_lower s = Sym.exists s ~f:Char.is_lowercase
     The conventions are applied to variables, that are not constrained
     explicitly by a user. The conventions are:
     Lowercase variables are column-vectors. Everything else is a matrix. *)
-let generate_lexical_constraints env =
-  let rec loop exp =
+let lexical_constraints env script =
+  let rec gen exp =
     match exp with
     | Num _ -> []
-    | Uop (_,e1) | Ind (e1,_,_) -> loop e1
-    | Bop (_,e1,e2) -> loop e1 @ loop e2
+    | Uop (_,e1) | Ind (e1,_,_) -> gen e1
+    | Bop (_,e1,e2) -> gen e1 @ gen e2
     | Var _ when Env.is_bound env exp -> []
     | Var s when is_lower s ->
       let (_,ri) = Env.get_or_add_fresh env exp in
       [ri, one]
     | Var _ -> [] in
-  loop
+  List.map script ~f:(function
+      | Some exp,_ -> gen exp
+      | None,_ -> []) |>
+  List.concat
+
+(** adds user's ring constraints to the typing environment  *)
+let init_env (script : script) =
+  let env = Env.empty () in
+  List.iter script ~f:(fun (_exp,decls) ->
+      List.iter decls ~f:(fun (sym,prop) ->
+          match prop with
+          | Kind _ | Ring (_,None) -> ()
+          | Ring (_, Some ty) -> Env.add env (Var sym) ty));
+  env
 
 (** [init exp constraints] initialize an environment from the
     expression [exp] with respect to user constraints *)
-let init exp cs =
-  let env = Env.empty () in
-  let cs = List.fold cs ~init:[] ~f:(fun constrs (sym,constr) ->
-      let (li,ri) = Env.get_or_add_fresh env Exp.(var sym) in
-      match type_of_string constr with
-      | `Matrix -> constrs
-      | `Vector -> (ri,one) :: constrs
-      | `Scalar -> (ri,one) :: (li,one) :: constrs
-      | `Unknown s ->
-        printf "Warning> unknown property %s\n" s;
-        constrs) in
-  match exp with
-  | Some exp ->
-    env, List.concat [generate_lexical_constraints env exp; cs]
-  | None -> env, cs
+let init (script : script) =
+  let env = init_env script in
+  let cs = List.map script ~f:(fun (_,decl) ->
+      List.map decl ~f:(fun (sym,property) -> match property with
+          | Ring _ -> []
+          | Kind p ->
+            let (li,ri) = Env.get_or_add_fresh env (Var sym) in
+            match type_of_string p with
+            | `Matrix -> []
+            | `Vector -> [ri,one]
+            | `Scalar -> [ri,one; li,one]
+            | `Unknown s ->
+              eprintf "Warning> unknown property %s\n" s;
+              [])) |>
+           List.concat in
+  env, List.concat (lexical_constraints env script :: cs)
 
 (** [binary_constr t1 t2 t3 op] given an expression $A `op` B = C$,
     with [A:t1, B:t2, C:t3] generate constraint according to
@@ -92,7 +107,6 @@ let rec recon ctx expr : (ty * constrs) =
 
 let substitute (f,t) x = if x = f then t else x
 
-
 module Subst = struct
   include Dim.Table
 
@@ -103,22 +117,30 @@ module Subst = struct
     replace t (t1,t2)
 end
 
-let is_var = function
-  | IVar _ -> true
-  | INum _ | IConst _ -> false
+let type_error (d1,d2) = raise (Type_error (d1,d2))
+
+let swap (a,b) = (b,a)
 
 let rec unify cs subst = match cs with
   | [] -> subst
   | (x,y)::cs when x = y -> unify cs subst
-  | (x,y)::cs when not (is_var x) -> unify ((y,x)::cs) subst
+  | ((IConst _, IConst _) as ty) :: _
+  | ((IConst _, INum _)   as ty) :: _
+  | ((INum _,   IConst _ )  as ty) :: _
+  | ((INum _,   INum _)     as ty) :: _ -> type_error ty
+  | ((IConst _ |INum _),IVar _) as c::cs -> unify (swap c :: cs) subst
   | (lhs,rhs)::cs -> match Subst.find subst lhs with
     | None -> unify cs (Subst.extend_replace subst (lhs,rhs))
     | Some v -> unify ((rhs,v) :: cs) subst
 
-let infer cs expr =
-  let env,ucs = init (Some expr) cs in
-  let _,cs = recon env expr in
-  let cs = cs @ ucs |> List.sort ~cmp:compare |> List.dedup in
+let infer (script : script) : subst =
+  let env,ucs = init script in
+  let cs = List.map script ~f:(function
+      | Some exp,_ -> snd(recon env exp)
+      | None,_ -> []) in
+  let cs = List.concat (ucs :: cs) |>
+           List.sort ~cmp:compare  |>
+           List.dedup in
   let subst = Subst.create () in
   let subst = unify cs subst in
   let ds = Subst.fold subst ~init:(UnionFind.create ())

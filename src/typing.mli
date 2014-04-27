@@ -3,6 +3,6 @@ open Ast
 open Type
 
 
-val infer: (char *string) list -> exp -> subst
+val infer: script -> subst
 (** [infer env exp] infer a type of expression  *)
 

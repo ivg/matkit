@@ -8,6 +8,8 @@ type t with sexp
 val empty: unit -> t
 (** [empty ()] creates an empty context.  *)
 
+val add: t -> exp -> ty -> unit
+
 val add_fresh: t -> exp -> ty
 (** [add_fresh ctx t] creates a fresh type variable and bind it
     with term [t]. Return the freshly created type variable. *)
@@ -22,6 +24,8 @@ val find: t -> exp -> ty option
 
 val is_bound: t -> exp -> bool
 (** [is_bound env t] true if term [t] is bound in context [env]. *)
+
+val bound_dims: t -> Dim.Set.t
 
 val create_substitution: t -> UnionFind.t -> subst
 (** [create_substitution ctx unifier] accepts a unifier and
