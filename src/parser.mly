@@ -24,6 +24,8 @@ let kind_list_of_strings (sym: char) (lst: string list) =
 %left PLUS MINUS
 %left MUL DIV HAD HDIV
 %left POW HPOW
+%nonassoc INV TRAN CONJ
+%nonassoc UNEG
 
 %token <string> NUM
 %token <char> SYM
@@ -51,26 +53,18 @@ stmt:
 (*** EXPRESSIONS ***)
 expr:
   | term                      { $1 }
-  | expr term                 { Bop(Mul, $1, $2) }
-  | expr INV                  { Bop(Pow, $1, Num (-1)) }
+  | term expr %prec MUL       { Bop(Mul, $1, $2) }
   | lhs=expr o=binop rhs=expr { Bop(o, lhs, rhs) }
-  | t=term op=post_unop       { Uop(op, t) }
   ;
 
 term:
-  | op=pre_unop t=term  { Uop(op, t) }
-  | LPAR expr RPAR      { $2 }
-  | SYM                 { Exp.var $1 }
-  | NUM                 { Num (int_of_string $1) }
-  ;
-
-%inline pre_unop:
-  | NEG             { UNeg }
-  ;
-
-%inline post_unop:
-  | TRAN            { Tran }
-  | CONJ            { Conj }
+  | LPAR expr RPAR         { $2 }
+  | SYM                    { Exp.var $1 }
+  | NUM                    { Num (int_of_string $1) }
+  | NEG t=term  %prec UNEG { Uop(UNeg, t) }
+  | t=term INV             { Bop(Pow, t, Num (-1)) }
+  | t=term TRAN            { Uop(Tran, t) }
+  | t=term CONJ            { Uop(Conj, t) }
   ;
 
 %inline binop:
