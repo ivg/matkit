@@ -2,9 +2,8 @@
 open Ast
 open Exp
 
-let kind_list_of_strings (sym: char) (lst: string list) =
+let kind_list_of_strings (sym: string) (lst: string list) =
   List.map (fun prop -> (sym,prop)) lst
-
 %}
 
 (* punctuation and keywords *)
@@ -28,7 +27,7 @@ let kind_list_of_strings (sym: char) (lst: string list) =
 %nonassoc UNEG
 
 %token <string> NUM
-%token <char> SYM
+%token <string> SYM
 
 %start script
 %type < Ast.script > script;
@@ -43,11 +42,9 @@ stmts:
   ;
 
 stmt:
-  | expr COMMA ring COMMA decls DOT { (Some $1, Some $3, $5) }
-  | expr COMMA decls DOT            { (Some $1, None, $3) }
-  | expr COMMA ring DOT             { (Some $1, Some $3, [] ) }
-  | expr DOT                        { (Some $1, None, [])}
-  | decls DOT                       { (None, None, $1)}
+  | expr COMMA decls DOT            { (Some $1, $3) }
+  | expr DOT                        { (Some $1, [])}
+  | decls DOT                       { (None, $1)}
   ;
 
 (*** EXPRESSIONS ***)
@@ -60,9 +57,9 @@ expr:
 term:
   | LPAR expr RPAR         { $2 }
   | SYM                    { Exp.var $1 }
-  | NUM                    { Num (int_of_string $1) }
+  | NUM                    { Num (float_of_string $1) }
   | NEG t=term  %prec UNEG { Uop(UNeg, t) }
-  | t=term INV             { Bop(Pow, t, Num (-1)) }
+  | t=term INV             { Bop(Pow, t, Num (-1.)) }
   | t=term TRAN            { Uop(Tran, t) }
   | t=term CONJ            { Uop(Conj, t) }
   ;
@@ -80,34 +77,27 @@ term:
   ;
 
 (*** DECLARATIONS ***)
+(** build up a list of properties and then add to Assoc list **)
 decls:
-  | decl                   { $1 }
-  | WHERE decl             { $2 }
-  | decl COMMA decls       { $1@$3 }
-  | WHERE decl COMMA decls { $2@$4 }
+  | SYM IS props                   { Decls.add_decl_to_sym $1 $3 }
+  | WHERE SYM IS props             { Decls.add_decl_to_sym $2 $4 }
+  | SYM IS props COMMA decls       { Decls.add_decl_to_sym ~decls:$5 $1 $3 }
+  | WHERE SYM IS props COMMA decls { Decls.add_decl_to_sym ~decls:$6 $2 $4 }
   ;
 
-decl:
-  | SYM IS kinds { kind_list_of_strings $1 $3 }
-  ;
-
-kinds:
-  | str           { [Sym.char_list $1] }
-  | str AND kinds { (Sym.char_list $1) :: $3 }
+props:
+  | str                         { [Sym.char_list $1] }
+  | IN ring_desc                { [$2] }
+  | IN RING ring_desc           { [$3] }
+  | str AND props               { (Sym.char_list $1) :: $3 }
+  | IN ring_desc AND props      { $2 :: $4 }
+  | IN RING ring_desc AND props { $3 :: $5 }
   ;
 
 (* strings are passed as a series of chars and must be reconstructed *)
 str:
   | SYM           { [$1] }
   | SYM str       { $1 :: $2 }
-  ;
-
-(*** RINGS ***)
-ring:
-  | SYM IN ring_desc               { $3 }
-  | SYM IN RING ring_desc          { $4 }
-  | WHERE SYM IS IN ring_desc      { $5 }
-  | WHERE SYM IS IN RING ring_desc { $6 }
   ;
 
 ring_desc:

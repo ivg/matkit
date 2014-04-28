@@ -37,7 +37,7 @@ with sexp, compare
 
 (** AST type *)
 type exp =
-  | Num of int                                (** Numeric constant  *)
+  | Num of float                              (** Numeric constant  *)
   | Var of sym                                (** A variable        *)
   | Uop of unary  * exp                       (** Unary operation   *)
   | Bop of binary * exp * exp                 (** Binary operation  *)
@@ -59,10 +59,15 @@ type property =
   | Ring of Ring.t * (dim * dim) option
 with sexp,compare
 
-type decls = (Sym.t,property) List.Assoc.t
-with sexp,compare
+module Decls = struct
+  type t = (Sym.t, property list) List.Assoc.t with sexp,compare
+  let add_decl_to_sym ?decls:(lst = []) (sym: Sym.t) (props: property list) : t =
+    match List.Assoc.find lst sym with
+    | None -> List.Assoc.add lst sym props
+    | Some p_lst -> List.Assoc.add lst sym (props @ p_lst)
+end
 
-type stmt = exp option * decls
+type stmt = exp option * Decls.t
 with sexp,compare
 
 type script = stmt list with sexp,compare
