@@ -84,6 +84,15 @@ let () =
                                        "C", ring "N,N"];
     assert_type exp3 exp3 "N,P" ~decl:["A", ring "N,M";
                                        "B", ring "M,N"];
+    assert_type exp3 exp3 "M,M" ~decl:["A", ring "1";
+                                       "B", ring "M,N";
+                                       "C", ring "N,M"
+                                      ];
+
+    assert_type exp3 exp3 "M,M" ~decl:["A", kind "scalar";
+                                       "B", ring "M,N";
+                                       "C", ring "N,M";
+                                      ];
   with Type_error (t1,t2) ->
     eprintf "type mismatches: %s <> %s\n"
       (Dim.to_string t1)
