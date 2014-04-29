@@ -2,28 +2,21 @@ open Core.Std
 open Ast
 
 type t = decls
+type dims = dim * dim
 
-type dim =
-  | Const_dim of int
-  | Var_dim of string
-  | Rigid_dim of string
-  | Empty
-with sexp, compare
+val kind_list_of_props: sym -> property list -> t
 
-type dims = dim * dim with sexp,compare
-
-val kind_list_of_props sym -> property list -> t
-
-val ring: sym -> ?dims -> property 
+val to_dim: int -> dim
+val ring: sym -> dims option -> property 
 val kind: sym -> property
 val decl: sym -> property list -> t
 
 (*
 creating decls
 
-(decl "A" [ring "r" (Var_dim "m",Var_dim "n"); 
+(decl "A" [ring "r" Some(IVar "m",IVar "n"); 
            kind "symmetric";
            kind "invertible"]) @
-(decl "B" [ring "r"; kind "invertible; kind "square"])
+(decl "B" [ring "r" None; kind "invertible"; kind "square"])
 
 *)
