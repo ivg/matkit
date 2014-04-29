@@ -1,15 +1,14 @@
 (** Helpers to build expression.
     Example:
       Expression $Ax = b$, can be encoded with:
-      [Exp.(Var 'A' * Var 'x' + Var 'b')]
+      [Exp.(Var "A" * Var "x" + Var "b")]
   *)
 open Core.Std
 open Ast
 
 type t = exp
 
-val var: char -> t
-val num: float  -> t
+val num: float -> t
 val ( * ): t -> t -> t
 val ( + ): t -> t -> t
 val ( - ): t -> t -> t
