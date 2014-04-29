@@ -2,7 +2,6 @@ open Core.Std
 open Sexplib.Std
 open Ast
 
-
 type parser_output = script
 with sexp
 
@@ -77,7 +76,7 @@ let test_binop () =
 let test_combinations () =
   printf "*** Testing Combined Operations ***\n";
   test_parses [
-    (Exp.(neg (Var "A") + Var "B"), "~A+B.");
+    (Exp.(neg (Var "A[i,j]") + Var "B"), "~A[i,j]+B.");
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
     (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
     (Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4.))),
@@ -91,7 +90,7 @@ let test_kinds () =
   print_parse "A, where A is square.";
   print_parse "A*x+b, where A is square and invertible.";
   print_parse "A*x+b, where A is in ring R {m}.";
-  print_parse "A^4, A in R {m, n},
+  print_parse "A^4, A is in R {m, n},
                     A is invertible,
                     where A is square and symmetric."
 

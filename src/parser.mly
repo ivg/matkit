@@ -1,9 +1,7 @@
 %{
 open Ast
 open Exp
-
-let kind_list_of_props (s: Ast.sym) (lst: property list) =
-  List.map (fun prop -> (s,prop)) lst
+open Decl
 %}
 
 (* punctuation and keywords *)
@@ -79,10 +77,10 @@ term:
 (*** DECLARATIONS ***)
 (** build up a list of properties and then add to Assoc list **)
 decls:
-  | SYM IS props                   { kind_list_of_props $1 $3 }
-  | WHERE SYM IS props             { kind_list_of_props $2 $4 }
-  | SYM IS props COMMA decls       { (kind_list_of_props $1 $3) @ $5 }
-  | WHERE SYM IS props COMMA decls { (kind_list_of_props $2 $4) @ $6 }
+  | SYM IS props                   { Decl.kind_list_of_props $1 $3 }
+  | WHERE SYM IS props             { Decl.kind_list_of_props $2 $4 }
+  | SYM IS props COMMA decls       { (Decl.kind_list_of_props $1 $3) @ $5 }
+  | WHERE SYM IS props COMMA decls { (Decl.kind_list_of_props $2 $4) @ $6 }
   ;
 
 props:

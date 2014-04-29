@@ -9,7 +9,7 @@ open Ast
 type t = exp
 
 val var: char -> t
-val num: int  -> t
+val num: float  -> t
 val ( * ): t -> t -> t
 val ( + ): t -> t -> t
 val ( - ): t -> t -> t
