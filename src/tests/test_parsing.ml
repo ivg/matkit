@@ -3,7 +3,7 @@ open Sexplib.Std
 open Ast
 
 
-type parser_output = (exp option * Ast.ring option * kind list) list
+type parser_output = script
 with sexp
 
 (*** PARSE, EXTRACT, PRINT AST ***)
@@ -14,8 +14,8 @@ let parse x = Parser.script Lexer.tokens (Lexing.from_string x)
 
 let extract_exp (x: parser_output)  =
   match x with
-  | [] | (None, _, _) :: _ -> failwith "No representation for empty exp\n"
-  | (Some e, _, _) :: _ -> e
+  | [] | (None, _) :: _ -> failwith "No representation for empty exp\n"
+  | (Some e, _) :: _ -> e
 
 let print_parse data =
   parse data
@@ -41,7 +41,7 @@ let test_term () =
   test_parses [
     (Exp.(Var "A"), "A.");
     (Exp.(Var "a"), "a.");
-    (Exp.(neg (Num 1)), "~1.");
+    (Exp.(neg (Num 1.)), "~1.");
     (Exp.(Var "A"), "(A).")
   ]
 
@@ -63,7 +63,7 @@ let test_binop () =
     (Exp.(Var "A" * Var "B"), "A*B.");
     (Exp.(Var "A" /. Var "B"), "A./B.");
     (Exp.(Var "A" *. Var "B"), "A.*B.");
-    (Exp.(Var "A" ** Num 2), "A^2.");
+    (Exp.(Var "A" ** Num 2.), "A^2.");
     (Exp.(Var "A" **. Var "B"), "A.^B.");
     (Exp.(Var "A" + (Var "B" * Var "C")), "A+B*C.");
     (Exp.(Var "A" * Var "B" + Var "C"),  "A*B+C.");
@@ -80,7 +80,7 @@ let test_combinations () =
     (Exp.(neg (Var "A") + Var "B"), "~A+B.");
     (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
     (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
-    (Exp.(((neg (Num 4)*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4))),
+    (Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4.))),
       "~4*~A'+B'-~C*4.");
     (Exp.(tran (neg (tran (neg (Var "A" + Var "B"))))), "~(~(A+B)')'.")
   ]

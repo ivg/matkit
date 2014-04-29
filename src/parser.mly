@@ -2,12 +2,12 @@
 open Ast
 open Exp
 
-let kind_list_of_strings (sym: string) (lst: string list) =
-  List.map (fun prop -> (sym,prop)) lst
+let kind_list_of_props (s: Ast.sym) (lst: property list) =
+  List.map (fun prop -> (s,prop)) lst
 %}
 
 (* punctuation and keywords *)
-%token END DOT COMMA LPAR RPAR LCUR RCUR
+%token END DOT COMMA LPAR RPAR LCUR RCUR 
 %token WHERE IS IN RING AND
 
 (* operations *)
@@ -56,7 +56,7 @@ expr:
 
 term:
   | LPAR expr RPAR         { $2 }
-  | SYM                    { Exp.var $1 }
+  | SYM                    { Var $1 }
   | NUM                    { Num (float_of_string $1) }
   | NEG t=term  %prec UNEG { Uop(UNeg, t) }
   | t=term INV             { Bop(Pow, t, Num (-1.)) }
@@ -79,17 +79,17 @@ term:
 (*** DECLARATIONS ***)
 (** build up a list of properties and then add to Assoc list **)
 decls:
-  | SYM IS props                   { Decls.add_decl_to_sym $1 $3 }
-  | WHERE SYM IS props             { Decls.add_decl_to_sym $2 $4 }
-  | SYM IS props COMMA decls       { Decls.add_decl_to_sym ~decls:$5 $1 $3 }
-  | WHERE SYM IS props COMMA decls { Decls.add_decl_to_sym ~decls:$6 $2 $4 }
+  | SYM IS props                   { kind_list_of_props $1 $3 }
+  | WHERE SYM IS props             { kind_list_of_props $2 $4 }
+  | SYM IS props COMMA decls       { (kind_list_of_props $1 $3) @ $5 }
+  | WHERE SYM IS props COMMA decls { (kind_list_of_props $2 $4) @ $6 }
   ;
 
 props:
-  | str                         { [Sym.char_list $1] }
+  | str                         { [Kind(Sym.concat $1)] }
   | IN ring_desc                { [$2] }
   | IN RING ring_desc           { [$3] }
-  | str AND props               { (Sym.char_list $1) :: $3 }
+  | str AND props               { Kind(Sym.concat $1) :: $3 }
   | IN ring_desc AND props      { $2 :: $4 }
   | IN RING ring_desc AND props { $3 :: $5 }
   ;
@@ -101,9 +101,9 @@ str:
   ;
 
 ring_desc:
-  | SYM LCUR dims RCUR { (Ring.ring_of_char $1, Some $3) }
-  | LCUR dims RCUR     { (Ring.ring_of_char 'R', Some $2) }
-  | SYM                { (Ring.ring_of_char $1, None) }
+  | SYM LCUR dims RCUR { Ring(Ring.ring_of_str $1, Some $3) }
+  | LCUR dims RCUR     { Ring(Ring.ring_of_str "R", Some $2) }
+  | SYM                { Ring(Ring.ring_of_str $1, None) }
   ;
 
 dims:
@@ -113,6 +113,6 @@ dims:
 
 dim:
   | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
-  | SYM { IVar (Sym.of_char $1) }
+  | SYM { IVar $1 }
   ;
 

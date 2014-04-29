@@ -16,10 +16,7 @@ open Parser
 (* here you can define shortcuts for regexps in a simple syntactic
    form «let name = regexp». *)
 
-(* id *)
-let lowercase = ['a'-'z']
-let uppercase = ['A'-'Z']
-let character = ['a'-'z' 'A'-'Z']
+
 
 (* numbers *)
 let digit = ['0'-'9']
@@ -27,6 +24,13 @@ let frac = '.' digit+
 let exp = ['e' 'E'] ['-' '+']? digit+
 let integer = digit+
 let decimal = digit* frac? exp?
+
+(* id *)
+let lowercase = ['a'-'z']
+let uppercase = ['A'-'Z']
+let character = (lowercase | uppercase)
+let index = '[' (integer | character+) (',' (integer | character+))? ']'
+let id = character index? 
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
@@ -52,7 +56,7 @@ rule tokens = parse
   | in_t  {IN}
   | ring  {RING}
   | and_t {AND}
-  | character as s {SYM s}
+  | id as s {SYM s}
   | integer as i {NUM i}
   | "=" {EQUALS}
   | "+" {PLUS}
@@ -69,7 +73,7 @@ rule tokens = parse
   | "(" {LPAR}
   | ")" {RPAR}
   | "{" {LCUR}
-  | "}" {RCUR} 
+  | "}" {RCUR}
   | "," {COMMA}
   | "#" {comment lexbuf}
 and comment = parse

@@ -46,11 +46,11 @@ with sexp, compare
 
 module Ring = struct
   type t = Z | R | C with sexp,compare
-  let ring_of_char c =
-    match c with
-    | 'Z' | 'z' -> Z
-    | 'C' | 'c' -> C
-    | 'R' | 'r' -> R
+  let ring_of_str s =
+    match s with
+    | "Z" | "z" -> Z
+    | "C" | "c" -> C
+    | "R" | "r" -> R
     | _ -> R (* should generate a warning at least *)
 end
 
@@ -59,15 +59,10 @@ type property =
   | Ring of Ring.t * (dim * dim) option
 with sexp,compare
 
-module Decls = struct
-  type t = (Sym.t, property list) List.Assoc.t with sexp,compare
-  let add_decl_to_sym ?decls:(lst = []) (sym: Sym.t) (props: property list) : t =
-    match List.Assoc.find lst sym with
-    | None -> List.Assoc.add lst sym props
-    | Some p_lst -> List.Assoc.add lst sym (props @ p_lst)
-end
+type decls = (Sym.t, property) List.Assoc.t
+with sexp,compare
 
-type stmt = exp option * Decls.t
+type stmt = exp option * decls
 with sexp,compare
 
 type script = stmt list with sexp,compare
