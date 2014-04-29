@@ -22,7 +22,9 @@ let is_lower s = Sym.exists s ~f:Char.is_lowercase
 let lexical_constraints env script =
   let rec gen exp =
     match exp with
-    | Num _ -> []
+    | Num _ ->
+      let (li,ri) = Env.get_or_add_fresh env exp in
+      [li,one; ri,one]
     | Uop (_,e1) | Ind (e1,_,_) -> gen e1
     | Bop (_,e1,e2) -> gen e1 @ gen e2
     | Var _ when Env.is_bound env exp -> []
@@ -81,37 +83,59 @@ let unary_constr (l1,r1) (l2,r2) = function
   | Tran ->        [l1,r2; r1,l2]
   | (UNeg|Conj) -> [l1,l2; r1,r2]
 
+let scalar_constr s1 s2 (l3,r3) = match s1,s2 with
+  | (_,true),(_,true) -> [l3,one; r3,one]
+  | (_,true),((l1,r1),false)
+  | ((l1,r1),false),(_,true) ->  [l1,l3; r1,r3]
+  | (_,false),(_,false) -> assert false
+
+
 (** [recon ctx expr] reconstruct a type of [expr], generating a set of
     constraints. *)
-let rec recon ctx expr : (ty * constrs) =
-  let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
-  match expr with
-  | Num _ ->  tt,[lt,one; rt,one]
-  | Var _ -> tt,[]
-  | Ind (s,i1,i2) ->
-    let _,cs = recon ctx s in
-    tt, List.concat [
-      (match i1,i2 with
-       | None, Some _ -> [rt,one]
-       | Some _, None -> [lt,one]
-       | Some _, Some _ -> [rt,one; lt,one]
-       | None, None -> []);
-      cs
-    ]
-  | Bop (op,s1,s2) ->
-    let t1,c1 = recon ctx s1 in
-    let t2,c2 = recon ctx s2 in
-    tt, List.concat [binary_constr t1 t2 tt op; c1; c2]
-  | Uop (op,s1) ->
-    let t1,c1 = recon ctx s1 in
-    tt,List.concat [unary_constr t1 tt op; c1]
-
-
-let substitute (f,t) x = if x = f then t else x
+let constraints ctx ucs exp : (ty * constrs) =
+  let is_scalar x =
+    match Env.find ctx x with
+    | Some (l,r) ->
+      let constrs t = List.filter ucs ~f:(fun (ty,_) -> Dim.(t = ty)) in
+      let has_one cs = List.exists cs ~f:(fun (_,c) -> Dim.(c = one)) in
+      let l = constrs l in
+      let r = constrs r in
+      has_one l && has_one r
+    | None -> false in
+  let rec recon expr =
+    let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
+    match expr with
+    | Num _ -> tt,[lt,one; rt,one]
+    | Var _ -> tt,[]
+    | Ind (s,i1,i2) ->
+      let _,cs = recon s in
+      tt, List.concat [
+        (match i1,i2 with
+         | None, Some _ -> [rt,one]
+         | Some _, None -> [lt,one]
+         | Some _, Some _ -> [rt,one; lt,one]
+         | None, None -> []);
+        cs
+      ]
+    | Bop (op,s1,s2) ->
+      let t1,c1 = recon s1 in
+      let t2,c2 = recon s2 in
+      let cons =
+        let s1_is_scalar = is_scalar s1 in
+        let s2_is_scalar = is_scalar s2 in
+        if op = Mul && (s1_is_scalar || s2_is_scalar)
+        then scalar_constr (t1,s1_is_scalar) (t2,s2_is_scalar) tt
+        else binary_constr t1 t2 tt op in
+      tt, List.concat [cons; c1; c2]
+    | Uop (op,s1) ->
+      let t1,c1 = recon s1 in
+      tt, List.concat [unary_constr t1 tt op; c1] in
+  recon exp
 
 module Subst = struct
   include Dim.Table
 
+  let substitute (f,t) x = if x = f then t else x
   let replace t s = map t ~f:(substitute s)
 
   let extend_replace t (t1,t2) =
@@ -124,32 +148,27 @@ let type_error (d1,d2) = raise (Type_error (d1,d2))
 let swap (a,b) = (b,a)
 
 let rec unify cs subst =
-  (* eprintf "step: \n%s\n\n" (Sexp.to_string_hum *)
-  (*                                     (sexp_of_constrs cs)); *)
   match cs with
   | [] -> subst
   | (x,y)::cs when x = y -> unify cs subst
-  | ((IConst _, IConst _) as ty) :: _
-  | ((IConst _, INum _)   as ty) :: _
-  | ((INum _,   IConst _ )  as ty) :: _
-  | ((INum _,   INum _)     as ty) :: _ -> type_error ty
+  | ((IConst _, IConst _)       as ty) :: _
+  | ((IConst _, INum _)         as ty) :: _
+  | ((INum _,   IConst _ )      as ty) :: _
+  | ((INum _,   INum _)         as ty) :: _ -> type_error ty
   | ((IConst _ |INum _),IVar _) as c::cs -> unify (swap c :: cs) subst
   | (IVar _ as lhs,rhs)::cs -> match Subst.find subst lhs with
     | None -> unify cs (Subst.extend_replace subst (lhs,rhs))
     | Some v -> unify ((rhs,v) :: cs) subst
 
+
 let infer (script : script) : subst =
   let env,ucs = init script in
   let cs = List.map script ~f:(function
-      | Some exp,_ -> snd(recon env exp)
+      | Some exp,_ -> snd(constraints env ucs exp)
       | None,_ -> []) in
   let cs = List.concat (ucs :: cs) |>
            List.sort ~cmp:compare  |>
            List.dedup in
-  (* eprintf "type environment is:\n%s\n" (Sexp.to_string_hum *)
-  (*                                         (Env.sexp_of_t env)); *)
-  (* eprintf "constraints are \n%s\n" (Sexp.to_string_hum *)
-  (*                                     (sexp_of_constrs cs)); *)
   let subst = Subst.create () in
   let subst = unify cs subst in
   let ds = Subst.fold subst ~init:(UnionFind.create ())
