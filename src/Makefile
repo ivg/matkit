@@ -10,5 +10,8 @@ matkit:
 test:
 	corebuild -j $(JOBS) tests/test_parsing.$(TARGET) --
 
+test_decl:
+	corebuild -j $(JOBS) tests/test_decl.$(TARGET) --
+
 clean:
 	corebuild -clean
