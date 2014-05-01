@@ -11,11 +11,6 @@ let string_of_parser_output out =
 
 let parse x = Parser.script Lexer.tokens (Lexing.from_string x)
 
-let extract_exp (x: parser_output)  =
-  match x with
-  | [] | (None, _) :: _ -> failwith "No representation for empty exp\n"
-  | (Some e, _) :: _ -> e
-
 let print_parse data =
   parse data
   |> string_of_parser_output
@@ -23,83 +18,94 @@ let print_parse data =
 
 
 (*** TEST PARSING HELPERS ***)
-let assert_parse e str =
-  assert(e = extract_exp (parse str))
 
-let test_parse e str =
+let assert_parse scrpt str =
+  let parsed = parse str in
+  assert(scrpt = parsed)
+
+let test_parse scrpt str =
   print_parse str;
-  assert_parse e str
+  assert_parse scrpt str
 
-let test_parses (input: (exp * string) list) =
-  List.iter ~f:(fun (e,s) -> test_parse e s) input
-
+let test_parses (input: (stmt * string) list) =
+  List.iter ~f:(fun (answer,str) -> test_parse [answer] str) input
 
 (*** TESTING FUNCTIONS ***)
 let test_term () =
   printf "*** Testing Single Terms ***\n";
   test_parses [
-    (Exp.(Var "A"), "A.");
-    (Exp.(Var "a"), "a.");
-    (Exp.(neg (Num 1.)), "~1.");
-    (Exp.(Var "A"), "(A).")
+    ((Some(Exp.(Var "A")), Decl.empty), "A.");
+    ((Some(Exp.(Var "a")), Decl.empty), "a.");
+    ((Some(Exp.(neg (Num 1.))), Decl.empty), "~1.");
+    ((Some(Exp.(Var "A")), Decl.empty), "(A).")
   ]
 
 let test_unop () =
   printf "*** Testing Unary Operations ***\n";
   test_parses [
-    (Exp.(neg (Var "A")), "~A.");
-    (Exp.(tran (Var "A")), "A'.");
-    (Exp.(tran (neg (Var "A"))), "~A'.");
-    (Exp.(neg (tran (Var "A"))), "~(A').")
+    ((Some(Exp.(neg (Var "A"))), Decl.empty), "~A.");
+    ((Some(Exp.(tran (Var "A"))), Decl.empty), "A'.");
+    ((Some(Exp.(tran (neg (Var "A")))), Decl.empty), "~A'.");
+    ((Some(Exp.(neg (tran (Var "A")))), Decl.empty), "~(A').")
   ]
 
 let test_binop () =
   printf "*** Testing Binary Operations ***\n";
-  print_parse "ABC + ABC.";
   test_parses [
-    (Exp.(Var "A" + Var "B"), "A+B.");
-    (Exp.(Var "A" - Var "B"), "A-B.");
-    (Exp.(Var "A" * Var "B"), "A*B.");
-    (Exp.(Var "A" /. Var "B"), "A./B.");
-    (Exp.(Var "A" *. Var "B"), "A.*B.");
-    (Exp.(Var "A" ** Num 2.), "A^2.");
-    (Exp.(Var "A" **. Var "B"), "A.^B.");
-    (Exp.(Var "A" + (Var "B" * Var "C")), "A+B*C.");
-    (Exp.(Var "A" * Var "B" + Var "C"),  "A*B+C.");
-    (Exp.(Var "A" + (Var "B" * (Var "C" ** Var "D"))), "A+B*C^D.");
-    (Exp.(Var "A" * Var "B"), "AB.");
-    (Exp.(neg (Var "A") * (neg (Var "B"))), "~A~B.");
-    (Exp.(tran (neg (Var "A")) * Var "B"), "~A'B.")
-  ];
-  print_parse "(A^2)C-A."
+    ((Some(Exp.(Var "A" + Var "B")), Decl.empty), "A+B.");
+    ((Some(Exp.(Var "A" - Var "B")), Decl.empty), "A-B.");
+    ((Some(Exp.(Var "A" * Var "B")), Decl.empty), "A*B.");
+    ((Some(Exp.(Var "A" /. Var "B")), Decl.empty), "A./B.");
+    ((Some(Exp.(Var "A" *. Var "B")), Decl.empty), "A.*B.");
+    ((Some(Exp.(Var "A" ** Num 2.)), Decl.empty), "A^2.");
+    ((Some(Exp.(Var "A" **. Var "B")), Decl.empty), "A.^B.");
+    ((Some(Exp.(Var "A" + (Var "B" * Var "C"))), Decl.empty), "A+B*C.");
+    ((Some(Exp.(Var "A" * Var "B" + Var "C")), Decl.empty), "A*B+C.");
+    ((Some(Exp.(Var "A" + (Var "B" * (Var "C" ** Var "D")))), Decl.empty), "A+B*C^D.");
+    ((Some(Exp.(Var "A" * Var "B")), Decl.empty), "AB.");
+    ((Some(Exp.(neg (Var "A") * (neg (Var "B")))), Decl.empty), "~A~B.");
+    ((Some(Exp.(tran (neg (Var "A")) * Var "B")), Decl.empty), "~A'B.")
+  ]
 
 let test_combinations () =
   printf "*** Testing Combined Operations ***\n";
   test_parses [
-    (Exp.(neg (Var "A[i,j]") + Var "B"), "~A[i,j]+B.");
-    (Exp.(neg (Var "A") + (neg (Var "B"))), "~A+~B.");
-    (Exp.(tran (neg (Var "A")) * (tran (neg (Var "B")))), "~A'*~B'.");
-    (Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-((neg (Var "C"))*(Num 4.))),
-      "~4*~A'+B'-~C*4.");
-    (Exp.(tran (neg (tran (neg (Var "A" + Var "B"))))), "~(~(A+B)')'.")
+    ((Some(Exp.(neg (Var "A[i,j]") + Var "B")), Decl.empty), "~A[i,j]+B.");
+    ((Some(Exp.(neg (Var "A") + (neg (Var "B")))), Decl.empty), "~A+~B.");
+    ((Some(Exp.(tran (neg (Var "A")) * (tran (neg (Var "B"))))), Decl.empty), "~A'*~B'.");
+    ((Some(Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-
+                 ((neg (Var "C"))*(Num 4.)))), Decl.empty), "~4*~A'+B'-~C*4.");
+    ((Some(Exp.(tran (neg (tran (neg (Var "A" + Var "B")))))), Decl.empty), "~(~(A+B)')'.")
   ]
 
-let test_kinds () =
-  printf "*** Testing Kinds ***\n";
-  print_parse "A is square.";
-  print_parse "A, where A is square.";
-  print_parse "A*x+b, where A is square and invertible.";
-  print_parse "A*x+b, where A is in ring R {m}.";
-  print_parse "A^4, A is in R {m, n},
-                    A is invertible,
-                    where A is square and symmetric."
+let test_decls () =
+  printf "*** Testing Decls ***\n";
+  test_parses [
+    ((None, Decl.(decl "A" [kind "invertible"])), "A is invertible.");
+    ((None, Decl.(decl "A" [ring "r" (Some(IVar "m", IVar "n"))])), "A is in r {m,n}.");
+    ((None, Decl.(decl "A" [kind "invertible";ring "r" (Some(IVar "m", IVar "n"))])),
+      "A is invertible and in ring {m,n}.");
+    ((None, Decl.(decl "A" [kind "square";kind "invertible"; ring "r" None])),
+      "A is square and invertible, A is in ring r.");
+    ((None, Decl.(decl "A" [ring "r" (Some(IVar "m", INum Nat1.one)); kind "invertible"])),
+      "A is in r {m} and invertible.");
+    ((None, (Decl.(decl "A" [kind "invertible"])) @ (Decl.(decl "B" [kind "invertible"]))),
+      "A is invertible,
+       B is invertible.");
+    ((None, (Decl.(decl "A" [kind "invertible"])) @ (Decl.(decl "B" [kind "invertible"])) @
+            (Decl.(decl "A" [ring "r" None]))),
+      "A is invertible,
+       B is invertible,
+       A is in r.");
+
+  ]
 
 let run_tests () =
   test_term ();
   test_unop ();
   test_binop ();
   test_combinations ();
-  test_kinds ()
+  test_decls ()
 
 let () = run_tests ()
 

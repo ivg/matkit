@@ -30,12 +30,12 @@ open Core.Std
 open Ast
 open Type
 
-
 type t = decl with sexp,compare
 
 val is_real: sym -> t
 val is_integer: sym -> t
 val is_complex: sym -> t
+
 
 type ring_decl = d1:Dim.t -> d2:Dim.t -> t
 

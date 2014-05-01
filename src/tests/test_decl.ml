@@ -1,6 +1,7 @@
 open Core.Std
 open Ast
 
+
 let () =
   let d1,d2 = Dim.(of_sym "N", of_sym "M") in
   let d1 : decls =

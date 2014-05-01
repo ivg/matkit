@@ -48,6 +48,8 @@ type ring = Z | R | C with sexp,compare,enumerate
 
 
 
+type dims = (dim * dim) with sexp,compare
+
 type property =
   | Kind of string
   | Ring of ring * (dim * dim) option

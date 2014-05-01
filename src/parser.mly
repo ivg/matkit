@@ -31,17 +31,20 @@ open Exp
 
 %%
 
-script: stmts END {$1};
+script: 
+  | stmts END { $1 }
+  | END       { [] }
+  ;
 
 stmts:
-  | stmt {[$1]}
-  | stmt stmts {$1 :: $2}
+  | stmt { [$1] }
+  | stmt stmts { $1 :: $2 }
   ;
 
 stmt:
   | expr COMMA decls DOT            { (Some $1, $3) }
-  | expr DOT                        { (Some $1, [])}
-  | decls DOT                       { (None, $1)}
+  | expr DOT                        { (Some $1, []) }
+  | decls DOT                       { (None, $1) }
   ;
 
 (*** EXPRESSIONS ***)

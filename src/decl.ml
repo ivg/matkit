@@ -8,7 +8,6 @@ let is_real s = s, Ring (R,None)
 let is_integer s = s, Ring (Z,None)
 let is_complex s = s, Ring (C,None)
 
-
 let ring s ~r ~d1 ~d2 = s, Ring(r,Some (d1,d2))
 let real = ring ~r:R
 let integer = ring ~r:Z
