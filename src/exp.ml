@@ -1,7 +1,9 @@
 open Core.Std
 open Ast
 
+let var s = Var (Sym.of_char s)
 let num n = Num n
+let int n = Num (Float.of_int n)
 let ( * ) t1 t2  = Bop (Mul,t1,t2)
 let ( *. ) t1 t2  = Bop (Had,t1,t2)
 let ( - ) t1 t2  = Bop (Sub,t1,t2)
