@@ -54,9 +54,11 @@ module Ring = struct
     | _ -> R (* should generate a warning at least *)
 end
 
+type dims = (dim * dim) with sexp,compare
+
 type property =
   | Kind of string
-  | Ring of Ring.t * (dim * dim) option
+  | Ring of Ring.t * dims option
 with sexp,compare
 
 type decls = (Sym.t, property) List.Assoc.t
