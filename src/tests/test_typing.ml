@@ -44,7 +44,7 @@ let assert_type_error ?decl exp =
   assert (r = `Ok)
 
 
-let ring s = Ring (Ring.R, Some (type_of_string s))
+let ring s = Ring (R, Some (type_of_string s))
 let kind k = Kind k
 
 let () =

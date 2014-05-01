@@ -5,6 +5,9 @@ type t = dim with sexp,compare
 include Comparable  with type t := t
 include Hashable    with type t := t
 include Stringable  with type t := t
+val one: t
+val of_int: int  -> t
+val of_nat: nat1 -> t
 val to_sym: t -> sym
 val of_sym: sym -> t
 val is_var: t -> bool

@@ -1,3 +1,4 @@
 PKG core
+PKG treeprint
 B _build
 S .

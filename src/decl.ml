@@ -1,16 +1,23 @@
 open Core.Std
 open Ast
-open Nat1
 
-type t = decls
-type d = dims
+type t = decl with sexp,compare
 
-let kind_list_of_props (s: sym) (lst: property list) =
-  List.map ~f:(fun prop -> (s,prop)) lst
+type ring_decl = d1:Dim.t -> d2:Dim.t -> t
+let is_real s = s, Ring (R,None)
+let is_integer s = s, Ring (Z,None)
+let is_complex s = s, Ring (C,None)
 
-let empty = []
-let to_dim n = INum(Nat1.of_int_exn n)
-let ring r d = Ring(Ring.ring_of_str r, d)
-let kind k = Kind(k)
-let decl s lst = kind_list_of_props s lst
-let to_string d = ""
+let ring s ~r ~d1 ~d2 = s, Ring(r,Some (d1,d2))
+let real = ring ~r:R
+let integer = ring ~r:Z
+let complex = ring ~r:C
+
+
+let kind s ~is = s, Kind is
+
+let matrix s = kind s ~is:"matrix"
+let vector s = kind s ~is:"vector"
+let scalar s = kind s ~is:"scalar"
+
+let assoc s = List.map ~f:(fun prop -> prop s)
