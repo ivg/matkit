@@ -51,7 +51,7 @@ let () =
   try
     let x,_,_ = Exp.(var 'x', var 'y', var 'z') in
     let a,b,c = Exp.(var 'A', var 'B', var 'C') in
-    let _2,_3 = Exp.(num 2, num 3) in
+    let _2,_3 = Exp.(int 2, int 3) in
     let exp1 = Exp.(tran x * a * x) in
     assert_type exp1 exp1 "1";
     assert_type exp1 exp1 "1" ~decl:["A", ring "M,M"];
