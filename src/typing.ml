@@ -174,5 +174,3 @@ let infer (script : script) : subst =
   let ds = Subst.fold subst ~init:(UnionFind.create ())
       ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
   Ctx.create_substitution env ds
-
-let token_of_subst _ = assert false
