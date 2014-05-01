@@ -5,7 +5,7 @@ open Decl
 %}
 
 (* punctuation and keywords *)
-%token END DOT COMMA LPAR RPAR LCUR RCUR 
+%token END DOT COMMA LPAR RPAR LCUR RCUR
 %token WHERE IS IN RING AND
 
 (* operations *)
@@ -77,10 +77,10 @@ term:
 (*** DECLARATIONS ***)
 (** build up a list of properties and then add to Assoc list **)
 decls:
-  | SYM IS props                   { Decl.kind_list_of_props $1 $3 }
-  | WHERE SYM IS props             { Decl.kind_list_of_props $2 $4 }
-  | SYM IS props COMMA decls       { (Decl.kind_list_of_props $1 $3) @ $5 }
-  | WHERE SYM IS props COMMA decls { (Decl.kind_list_of_props $2 $4) @ $6 }
+  | SYM IS props                   { Decl.create $1 $3 }
+  | WHERE SYM IS props             { Decl.create $2 $4 }
+  | SYM IS props COMMA decls       { (Decl.create $1 $3) @ $5 }
+  | WHERE SYM IS props COMMA decls { (Decl.create $2 $4) @ $6 }
   ;
 
 props:
@@ -113,4 +113,3 @@ dim:
   | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
   | SYM { IVar $1 }
   ;
-
