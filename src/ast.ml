@@ -44,22 +44,19 @@ type exp =
   | Ind of exp * dim option * dim option      (** Indexing  *)
 with sexp, compare
 
-module Ring = struct
-  type t = Z | R | C with sexp,compare,enumerate
-  let ring_of_str s =
-    match s with
-    | "Z" | "z" -> Z
-    | "C" | "c" -> C
-    | "R" | "r" -> R
-    | _ -> R (* should generate a warning at least *)
-end
+type ring = Z | R | C with sexp,compare,enumerate
+
+
 
 type property =
   | Kind of string
-  | Ring of Ring.t * (dim * dim) option
+  | Ring of ring * (dim * dim) option
 with sexp,compare
 
-type decls = (Sym.t, property) List.Assoc.t
+type decl = Sym.t * property
+with sexp,compare
+
+type decls = decl list
 with sexp,compare
 
 type stmt = exp option * decls
@@ -68,3 +65,6 @@ with sexp,compare
 type script = stmt list with sexp,compare
 
 exception Type_error of dim * dim with sexp
+
+module Printer = Treeprint.Printer
+type ppr = Printer.ppr

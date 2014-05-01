@@ -24,6 +24,9 @@ let of_string s = match Sym.to_list s with
   | c :: '_' :: _ -> if Char.is_lowercase c then IVar s else IConst s
   | _ -> invalid_arg ("invalid dim format: " ^ s)
 
+let one = INum Nat1.one
+let of_nat n = INum n
+let of_int n = INum (Nat1.of_int_exn n)
 let to_sym = to_string
 let of_sym = of_string
 

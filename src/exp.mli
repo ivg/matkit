@@ -22,6 +22,7 @@ val neg: t -> t
 val tran: t -> t
 val conj: t -> t
 val to_string: t -> string
+val is_var: t -> bool
 
 val fold: t -> init:'a -> f:(t -> 'a -> 'a) -> 'a
 

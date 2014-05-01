@@ -1,7 +1,6 @@
 %{
 open Ast
 open Exp
-open Decl
 %}
 
 (* punctuation and keywords *)
@@ -77,17 +76,17 @@ term:
 (*** DECLARATIONS ***)
 (** build up a list of properties and then add to Assoc list **)
 decls:
-  | SYM IS props                   { Decl.create $1 $3 }
-  | WHERE SYM IS props             { Decl.create $2 $4 }
-  | SYM IS props COMMA decls       { (Decl.create $1 $3) @ $5 }
-  | WHERE SYM IS props COMMA decls { (Decl.create $2 $4) @ $6 }
+  | SYM IS props                   { Decl.assoc $1 $3 }
+  | WHERE SYM IS props             { Decl.assoc $2 $4 }
+  | SYM IS props COMMA decls       { (Decl.assoc $1 $3) @ $5 }
+  | WHERE SYM IS props COMMA decls { (Decl.assoc $2 $4) @ $6 }
   ;
 
 props:
-  | str                         { [Kind(Sym.concat $1)] }
+  | str                         { [Decl.kind ~is:(Sym.concat $1)] }
   | IN ring_desc                { [$2] }
   | IN RING ring_desc           { [$3] }
-  | str AND props               { Kind(Sym.concat $1) :: $3 }
+  | str AND props               { (Decl.kind ~is:(Sym.concat $1)) :: $3 }
   | IN ring_desc AND props      { $2 :: $4 }
   | IN RING ring_desc AND props { $3 :: $5 }
   ;
@@ -99,9 +98,9 @@ str:
   ;
 
 ring_desc:
-  | SYM LCUR dims RCUR { Ring(Ring.ring_of_str $1, Some $3) }
-  | LCUR dims RCUR     { Ring(Ring.ring_of_str "R", Some $2) }
-  | SYM                { Ring(Ring.ring_of_str $1, None) }
+  | SYM LCUR dims RCUR { fun s -> s,Ring(Ring.of_string $1, Some $3) }
+  | LCUR dims RCUR     { fun s -> s,Ring(R, Some $2) }
+  | SYM                { fun s -> s,Ring(Ring.of_string $1, None) }
   ;
 
 dims:

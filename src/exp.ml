@@ -2,6 +2,10 @@ open Core.Std
 open Ast
 
 let var s = Var (Sym.of_char s)
+let is_var = function
+  | Var _ -> true
+  | _ -> false
+
 let num n = Num n
 let int n = Num (Float.of_int n)
 let ( * ) t1 t2  = Bop (Mul,t1,t2)
