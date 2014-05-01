@@ -38,6 +38,8 @@ let is_num = function
   | INum _ -> true
   | IVar _ | IConst _ -> false
 
+let ppr d = d |> to_string |> Printer.string
+
 type mapping = int -> t
 
 

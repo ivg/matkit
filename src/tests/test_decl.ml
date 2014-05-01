@@ -7,12 +7,16 @@ let () =
   let d1 : decls =
     Decl.(assoc "A" [
         real ~d1 ~d2;
-        matrix;
         kind ~is:"symmetric";
         kind ~is:"invertible"
       ] @ assoc "B" [
-        is_real; matrix;
+        is_real;
         kind ~is:"invertible";
         kind ~is:"square"]) in
+
+
+  let s1 = Printer.show Decl.ppr_list d1 in
+
+  printf "s1 = %s\n" s1;
 
   ()

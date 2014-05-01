@@ -22,3 +22,5 @@ val create_mapping: const:bool -> used:Set.t -> mapping
     of type [t] that are free in set [used] and are either variables or
     constants in a case when [const] parameter is true.
 *)
+
+val ppr: t -> ppr
