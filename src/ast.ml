@@ -17,14 +17,14 @@ type binary =
   | Had        (** Hadamard multiplication  *)
   | HDiv       (** Hadamard division  *)
   | HPow       (** Hadamard power  *)
-with sexp, compare
+with sexp, compare, enumerate
 
 (** unary operations  *)
 type unary =
   | Tran      (** Transpose (and possibly conjugate)   *)
   | Conj      (** Conjugate (without a transposition)  *)
   | UNeg      (** Negation  *)
-with sexp, compare
+with sexp, compare, enumerate
 
 (** positive natural numbers  *)
 type nat1 = Nat1.t with sexp,compare
@@ -45,7 +45,7 @@ type exp =
 with sexp, compare
 
 module Ring = struct
-  type t = Z | R | C with sexp,compare
+  type t = Z | R | C with sexp,compare,enumerate
   let ring_of_str s =
     match s with
     | "Z" | "z" -> Z
@@ -68,4 +68,3 @@ with sexp,compare
 type script = stmt list with sexp,compare
 
 exception Type_error of dim * dim with sexp
-

@@ -23,13 +23,13 @@ let lexical_constraints env script =
   let rec gen exp =
     match exp with
     | Num _ ->
-      let (li,ri) = Env.get_or_add_fresh env exp in
+      let (li,ri) = Ctx.get_or_add_fresh env exp in
       [li,one; ri,one]
     | Uop (_,e1) | Ind (e1,_,_) -> gen e1
     | Bop (_,e1,e2) -> gen e1 @ gen e2
-    | Var _ when Env.is_bound env exp -> []
+    | Var _ when Ctx.is_bound env exp -> []
     | Var s when is_lower s ->
-      let (_,ri) = Env.get_or_add_fresh env exp in
+      let (_,ri) = Ctx.get_or_add_fresh env exp in
       [ri, one]
     | Var _ -> [] in
   List.map script ~f:(function
@@ -44,20 +44,20 @@ let user_constraints env (script : script) =
           match prop with
           | Kind _ | Ring (_,None) -> []
           | Ring (_, Some (t1,t2)) ->
-            let (ld,rd) = Env.get_or_add_fresh env (Var sym) in
+            let (ld,rd) = Ctx.get_or_add_fresh env (Var sym) in
             [ld,t1; rd,t2]))
   |> List.concat |> List.concat
 
 (** [init exp constraints] initialize an environment from the
     expression [exp] with respect to user constraints *)
 let init (script : script) =
-  let env = Env.empty () in
+  let env = Ctx.empty () in
   let ucs = user_constraints env script in
   let cs = List.map script ~f:(fun (_,decl) ->
       List.map decl ~f:(fun (sym,property) -> match property with
           | Ring _ -> []
           | Kind p ->
-            let (li,ri) = Env.get_or_add_fresh env (Var sym) in
+            let (li,ri) = Ctx.get_or_add_fresh env (Var sym) in
             match type_of_string p with
             | `Matrix -> []
             | `Vector -> [ri,one]
@@ -94,7 +94,7 @@ let scalar_constr s1 s2 (l3,r3) = match s1,s2 with
     constraints. *)
 let constraints ctx ucs exp : (ty * constrs) =
   let is_scalar x =
-    match Env.find ctx x with
+    match Ctx.find ctx x with
     | Some (l,r) ->
       let constrs t = List.filter ucs ~f:(fun (ty,_) -> Dim.(t = ty)) in
       let has_one cs = List.exists cs ~f:(fun (_,c) -> Dim.(c = one)) in
@@ -103,7 +103,7 @@ let constraints ctx ucs exp : (ty * constrs) =
       has_one l && has_one r
     | None -> false in
   let rec recon expr =
-    let (lt,rt) as tt = Env.get_or_add_fresh ctx expr in
+    let (lt,rt) as tt = Ctx.get_or_add_fresh ctx expr in
     match expr with
     | Num _ -> tt,[lt,one; rt,one]
     | Var _ -> tt,[]
@@ -173,4 +173,6 @@ let infer (script : script) : subst =
   let subst = unify cs subst in
   let ds = Subst.fold subst ~init:(UnionFind.create ())
       ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
-  Env.create_substitution env ds
+  Ctx.create_substitution env ds
+
+let token_of_subst _ = assert false
