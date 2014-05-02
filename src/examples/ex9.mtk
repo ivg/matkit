@@ -1,0 +1,5 @@
+#!/usr/bin/env matkit
+
+# another example of assigning kinds to multiple variables
+
+A'+B'=C, let A, B and C be invertible.

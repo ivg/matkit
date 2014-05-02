@@ -56,6 +56,7 @@ let test_binop () =
     ((Some(Exp.(Var "A" + Var "B")), []), "A+B.");
     ((Some(Exp.(Var "A" - Var "B")), []), "A-B.");
     ((Some(Exp.(Var "A" * Var "B")), []), "A*B.");
+    ((Some(Exp.(Var "A" =. Var "B")),[]), "A=B.");
     ((Some(Exp.(Var "A" /. Var "B")), []), "A./B.");
     ((Some(Exp.(Var "A" *. Var "B")), []), "A.*B.");
     ((Some(Exp.(Var "A" ** Num 2.)), []), "A^2.");
@@ -76,7 +77,8 @@ let test_combinations () =
     ((Some(Exp.(tran (neg (Var "A")) * (tran (neg (Var "B"))))), []), "~A'*~B'.");
     ((Some(Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-
                  ((neg (Var "C_123"))*(Num 4.)))), []), "~4*~A'+B'-~C_123*4.");
-    ((Some(Exp.(tran (neg (tran (neg (Var "A" + Var "B")))))), []), "~(~(A+B)')'.")
+    ((Some(Exp.(tran (neg (tran (neg (Var "A" + Var "B")))))), []), "~(~(A+B)')'.");
+    ((Some(Exp.(tran (neg (Var "A")) * (tran (neg (Var "B"))) =. Var "C")), []), "~A'*~B'=C.")
   ]
 
 let test_decls () =
@@ -84,28 +86,30 @@ let test_decls () =
   let d1,d2 = Dim.(of_sym "m", of_sym "n") in
 
   test_parses [
-    ((None, Decl.([kind "A" ~is:"invertible"])), "let A be invertible.");
-    ((None, Decl.(assoc "A" [real ~d1 ~d2])), "let A is in R {m,n}.");
+    ((None, Decl.([kind "A" ~is:"invertible"])), "where A is invertible.");
+    ((None, Decl.(assoc "A" [real ~d1 ~d2])), "where A is in R {m,n}.");
     ((None, Decl.(assoc "A" [kind ~is:"invertible"; real ~d1 ~d2])),
-      "let A is invertible and in ring {m,n}.");
+      "A is invertible and in ring {m,n}.");
     ((None, Decl.(assoc "A" [kind ~is:"square"; kind ~is:"invertible"; is_real])),
-      "let A is square and invertible, let A be in ring R.");
+      "A is square and invertible, A is in ring R.");
 
     ((None, Decl.(assoc "A" [real ~d1 ~d2:Dim.one; kind ~is:"invertible"])),
-      "let A is in R {m} and invertible.");
+      "where A is in R {m} and invertible.");
 
     ((None, (Decl.([kind "A" ~is:"invertible"; kind "B" ~is:"invertible"]))),
-      "let A is invertible,
-       let B is invertible.");
+      "where A is invertible,
+       B is invertible.");
     ((None, (Decl.([kind "A" ~is:"invertible"; kind "B"
                       ~is:"invertible"] @ assoc "A" [is_real]))),
-      "let A be invertible,
-       let B be invertible,
-       let A be in R.");
+      "A is invertible,
+       where B is invertible,
+       where A is in R.");
     ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"invertible"; real ~d1 ~d2]))),
       "let A,B be invertible and in ring R {m,n}.");
     ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"square"; kind ~is:"invertible"]))),
       "let A and B be square and invertible.");
+    ((None, (Decl.(group_assoc ["A";"B";"C"] [kind ~is:"invertible"]))),
+      "let A, B and C be invertible.")
   ]
 
 let run_tests () =

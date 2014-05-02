@@ -29,6 +29,7 @@ let whitespace = (newline | space)*
 (* current definition is not sufficient, reimplement
  * after word break sign is worked out *)
 let let_t = "let "
+let where = "where "
 let is = " is "
 let are = " are "
 let be = " be "
@@ -42,7 +43,10 @@ rule tokens = parse
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
   | let_t {LET}
-  | is | are | be {IS}
+  | where {WHERE}
+  | is {IS} 
+  | are {IS} 
+  | be {IS}
   | in_t  {IN}
   | ring  {RING}
   | and_t {AND}

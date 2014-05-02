@@ -11,6 +11,7 @@ type t = exp
 val var: string -> t
 val num: float -> t
 val int: int -> t
+val ( =. ): t -> t -> t
 val ( * ): t -> t -> t
 val ( + ): t -> t -> t
 val ( - ): t -> t -> t

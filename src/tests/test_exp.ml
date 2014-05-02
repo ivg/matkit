@@ -8,5 +8,5 @@ let () =
 
 let () =
   let exp_ppr = Exp.ppr (Exp.((Var "A" + Var "B") * Var "C")) in
-  let res = Printer.Token.show (exp_ppr Noassoc 0.0) in
+  let res = Printer.Token.show (exp_ppr Printer.Noassoc 0.0) in
   printf "result = %s\n" res

@@ -1,0 +1,5 @@
+#!/usr/bin/env matkit
+
+# assigning a kind and a ring
+
+Ax = b, A is invertible and in ring R {m,n}.

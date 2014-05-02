@@ -6,7 +6,7 @@
 
 for f in `ls ex*.mtk`; do
     echo "checking $f"
-    ../matkit.byte infer -i $f | ../matkit.byte infer && echo "ok" || echo "failed"
+    ../../matkit.native infer -i $f | ../../matkit.native infer && echo "ok" || echo "failed"
 done
 
 

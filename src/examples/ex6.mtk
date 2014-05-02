@@ -1,0 +1,5 @@
+#!/usr/bin/env matkit
+
+# grouping operations
+
+~A'B = C, where A is invertible.

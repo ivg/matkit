@@ -1,0 +1,5 @@
+#!/usr/bin/env matkit
+
+# assigning kinds and rings to multiple variables at once
+
+AB=C, let A, B be square and in R {m}.
