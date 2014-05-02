@@ -27,7 +27,7 @@ let ppr_prop prop =
   let str = string in
   let ring s = s |> Ring.to_string |> str in
   let seq = list 1.0 space in
-  match prop with
+  let ppr = match prop with
   | Ring (r,None) -> seq [str "in"; ring r]
   | Ring (r, Some ds) when Typing.is_scalar ds ->
     seq [str "scalar"; str "in"; ring r]
@@ -37,7 +37,8 @@ let ppr_prop prop =
   | Ring (r, Some (d1,d2)) ->
     seq [str "in"; ring r;
          (str "[" ++ Dim.ppr d1 ++ str "," ++ Dim.ppr d2 ++ str "]")]
-  | Kind s -> seq [str s]
+  | Kind s -> seq [str s] in
+  box 2 ppr
 
 let ppr (s,prop) = Printer.(string s ++ space ++ ppr_prop prop)
 
@@ -52,13 +53,15 @@ let ppr_list (decls : t list) =
         | [] -> assert false
         | (s,p)::ds ->
           let cmp = compare_property in
+          let equal p1 p2 = cmp p1 p2 = 0 in
           let ps = List.sort ~cmp (p :: List.map ds ~f:snd) in
-          s, List.dedup ~compare:cmp ps) in
+          s, List.remove_consecutive_duplicates ~equal ps) in
 
   let ppr_group (s,props) =
     let sep = space ++ string "and" ++ space in
     string s ++ space ++ string "is" ++ space ++
-    (List.map props ~f:ppr_prop |> list 0.5 sep) in
-
-  let group_sep = flush ++ space ++ space in
-  group_sep ++ (List.map grouped ~f:ppr_group |> Printer.(list 0.25 group_sep))
+    (List.map props ~f:ppr_prop |> list 0.5 sep)
+    |> box 2 in
+  let bignbsp = string "      " in
+  let group_sep = string "," ++ flush ++ bignbsp in
+  string " " ++ (List.map grouped ~f:ppr_group |> list 0.25 group_sep)
