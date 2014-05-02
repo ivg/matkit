@@ -29,9 +29,10 @@ let whitespace = (newline | space)*
 (* keywords *)
 (* current definition is not sufficient, reimplement
  * after word break sign is worked out *)
-let where = "where "
-let is = "is "
-let are = "are "
+let let_t = "let "
+let is = " is "
+let are = " are "
+let be = " be " 
 let in_t = "in "
 let ring = "ring "
 let and_t = "and "
@@ -41,8 +42,8 @@ rule tokens = parse
   | space {tokens lexbuf}
   | newline {new_line lexbuf; tokens lexbuf}
   | "." {DOT}
-  | where {WHERE}
-  | is    {IS}
+  | let_t {LET}
+  | is | are | be {IS}
   | in_t  {IN}
   | ring  {RING}
   | and_t {AND}
