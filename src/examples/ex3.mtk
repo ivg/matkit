@@ -4,7 +4,7 @@
 # This is a vector scaling. x and b, should be infered as vectors of
 # the same size N.
 
-Ax = b, where A is scalar.
+Ax = b, let A be scalar.
 
 
 

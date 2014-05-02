@@ -102,7 +102,9 @@ let test_decls () =
        let B be invertible,
        let A be in R.");
     ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"invertible"; real ~d1 ~d2]))),
-      "let A,B be invertible and in ring R {m,n}.")
+      "let A,B be invertible and in ring R {m,n}.");
+    ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"square"; kind ~is:"invertible"]))),
+      "let A and B be square and invertible");
   ]
 
 let run_tests () =
