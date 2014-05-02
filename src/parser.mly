@@ -31,7 +31,7 @@ open Exp
 
 %%
 
-script: 
+script:
   | stmts END { $1 }
   | END       { [] }
   ;
@@ -107,11 +107,11 @@ ring_desc:
   ;
 
 dims:
-  | dim           { ($1, INum (Nat1.of_int_exn 1)) }
+  | dim           { ($1, Dim.one) }
   | dim COMMA dim { ($1, $3) }
   ;
 
 dim:
-  | NUM { INum (Nat1.of_int_exn (int_of_string $1)) }
-  | SYM { IVar $1 }
+  | NUM { Dim.of_sym $1 }
+  | SYM { Dim.of_sym $1 }
   ;

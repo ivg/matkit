@@ -66,7 +66,5 @@ with sexp,compare
 
 type script = stmt list with sexp,compare
 
-exception Type_error of dim * dim with sexp
-
 module Printer = Treeprint.Printer
 type ppr = Printer.ppr

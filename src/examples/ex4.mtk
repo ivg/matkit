@@ -1,0 +1,8 @@
+#!/usr/bin/env matkit
+
+# yet another overloading.
+
+ABC = (CB)', where A is scalar.
+
+
+

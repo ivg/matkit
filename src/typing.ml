@@ -143,9 +143,12 @@ module Subst = struct
     replace t (t1,t2)
 end
 
-let type_error (d1,d2) = raise (Type_error (d1,d2))
+
+exception Unification_failed of ty * dim Subst.t with sexp
+let fail ty subst = raise (Unification_failed (ty,subst))
 
 let swap (a,b) = (b,a)
+
 
 let rec unify cs subst =
   match cs with
@@ -154,12 +157,15 @@ let rec unify cs subst =
   | ((IConst _, IConst _)       as ty) :: _
   | ((IConst _, INum _)         as ty) :: _
   | ((INum _,   IConst _ )      as ty) :: _
-  | ((INum _,   INum _)         as ty) :: _ -> type_error ty
+  | ((INum _,   INum _)         as ty) :: _ -> fail ty subst
   | ((IConst _ |INum _),IVar _) as c::cs -> unify (swap c :: cs) subst
   | (IVar _ as lhs,rhs)::cs -> match Subst.find subst lhs with
     | None -> unify cs (Subst.extend_replace subst (lhs,rhs))
     | Some v -> unify ((rhs,v) :: cs) subst
 
+let union_find subst =
+  Subst.fold subst ~init:(UnionFind.create ())
+    ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs)
 
 let infer (script : script) : subst =
   let env,ucs = init script in
@@ -170,10 +176,16 @@ let infer (script : script) : subst =
            List.sort ~cmp:compare  |>
            List.remove_consecutive_duplicates ~equal:(=) in
   let subst = Subst.create () in
-  let subst = unify cs subst in
-  let ds = Subst.fold subst ~init:(UnionFind.create ())
-      ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
-  Ctx.create_substitution env ds
+  try
+    let subst = unify cs subst in
+    let ds = union_find subst in
+    Ctx.create_substitution env ds
+  with Unification_failed ((d1,d2),subst) ->
+    let ds = union_find subst in
+    raise (Type_error (d1, d2, Ctx.create_substitution env ds))
 
 let is_scalar (d1,d2) = Dim.(d1 = one && d2 = one)
 let is_vector (d1,d2) = Dim.(d1 <> one && d2 = one)
+
+let string_of_error d1 d2 subst =
+  sprintf "%s is not equal to %s" Dim.(to_string d1) Dim.(to_string d2)

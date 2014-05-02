@@ -30,8 +30,6 @@ let is_var = function
 let is_const v = not (is_var v)
 let has_consts ss = Set.exists ss ~f:is_const
 
-let type_error d1 d2 = raise (Type_error (d1,d2))
-
 (** [nth_dims used n] finds an appropriate constant name for an nth
     group of variables. At first it tries to use nice names. If all
     names are already used then it creates a fresh name from an
@@ -53,4 +51,4 @@ let find t x : dim =
     | Some ss -> match Set.to_list (Set.filter ss ~f:is_const) with
       | [] -> assert false
       | [r] -> r
-      | r1::r2::_ -> type_error r1 r2
+      | r1::r2::_ -> assert false

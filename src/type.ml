@@ -26,4 +26,6 @@ with sexp,compare
 type constrs = constr list with sexp,compare
 
 (** a mapping from expressions to types  *)
-type subst = ty Exp.Map.t
+type subst = ty Exp.Map.t with sexp,compare
+
+exception Type_error of dim * dim * subst with sexp
