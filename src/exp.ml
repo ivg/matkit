@@ -88,7 +88,7 @@ module ExpPrinter = struct
  let neg  = mprefix neg_lev "~"
  let inv  = mpostfix inv_lev "`"
  let tran = mpostfix inv_lev "'"
- let conj = mpostfix inv_lev "\"" (** placeholder until representation is decided **)
+ let conj = mpostfix inv_lev "\""
 end
 
 let is_inv expr =
