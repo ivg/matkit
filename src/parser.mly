@@ -5,7 +5,7 @@ open Exp
 
 (* punctuation and keywords *)
 %token END DOT COMMA LPAR RPAR LCUR RCUR
-%token WHERE IS IN RING AND
+%token WHERE IS ARE IN RING AND 
 
 (* operations *)
 %token PLUS MINUS
@@ -79,10 +79,14 @@ term:
 (*** DECLARATIONS ***)
 (** build up a list of properties and then add to Assoc list **)
 decls:
-  | SYM IS props                   { Decl.assoc $1 $3 }
-  | WHERE SYM IS props             { Decl.assoc $2 $4 }
-  | SYM IS props COMMA decls       { (Decl.assoc $1 $3) @ $5 }
-  | WHERE SYM IS props COMMA decls { (Decl.assoc $2 $4) @ $6 }
+  | SYM IS props                     { Decl.assoc $1 $3 }
+  | syms props                       { Decl.group_assoc $1 $2 }
+  | WHERE SYM IS props               { Decl.assoc $2 $4 }
+  | WHERE syms props                 { Decl.group_assoc $2 $3 }
+  | SYM IS props COMMA decls         { (Decl.assoc $1 $3) @ $5 }
+  | syms props COMMA decls           { (Decl.group_assoc $1 $2) @ $4 }
+  | WHERE SYM IS props COMMA decls   { (Decl.assoc $2 $4) @ $6 }
+  | WHERE syms props COMMA decls     { (Decl.group_assoc $2 $3) @ $5 }
   ;
 
 props:
@@ -94,6 +98,10 @@ props:
   | IN RING ring_desc AND props { $3 :: $5 }
   ;
 
+syms:
+  | SYM ARE        { [$1] }
+  | SYM COMMA syms { $1 :: $3 }
+  ;
 (* strings are passed as a series of chars and must be reconstructed *)
 str:
   | SYM           { [$1] }

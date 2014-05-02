@@ -21,6 +21,7 @@ let vector s = kind s ~is:"vector"
 let scalar s = kind s ~is:"scalar"
 
 let assoc s = List.map ~f:(fun prop -> prop s)
+let group_assoc syms prop = List.concat (List.map ~f:(fun s -> assoc s prop) syms)
 
 let ppr_prop prop =
   let open Printer in

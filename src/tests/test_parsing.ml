@@ -98,10 +98,11 @@ let test_decls () =
        B is invertible.");
     ((None, (Decl.([kind "A" ~is:"invertible"; kind "B"
                       ~is:"invertible"] @ assoc "A" [is_real]))),
-      "A is invertible,
+      "where A is invertible,
        B is invertible,
        A is in R.");
-  ]
+  ];
+  string_of_parser_output [(None, Decl.(group_assoc ["A";"B";"C"] [real ~d1 ~d2:Dim.one; kind ~is:"invertible"]))] |> printf "%s\n"
 
 let run_tests () =
   test_term ();

@@ -2,6 +2,7 @@
 open Core.Std
 open Lexing
 open Parser
+open Str
 }
 
 (* numbers *)
@@ -30,6 +31,7 @@ let whitespace = (newline | space)*
  * after word break sign is worked out *)
 let where = "where "
 let is = "is "
+let are = "are "
 let in_t = "in "
 let ring = "ring "
 let and_t = "and "
