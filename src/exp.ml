@@ -123,12 +123,6 @@ let rec ppr expr : ppr  =
     | HPow -> expr1_ppr **. expr2_ppr)
   | Ind (expr', dim1, dim2) -> failwith "Todo"
 
-
-let ppr exp =
-  let open Debug in
-  eprints "exp" exp sexp_of_exp;
-  ppr exp
-
 let ppr_list exprs = failwith "Todo"
 
 module T = struct
