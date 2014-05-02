@@ -74,7 +74,7 @@ let test_combinations () =
     ((Some(Exp.(neg (Var "A") + (neg (Var "B")))), []), "~A+~B.");
     ((Some(Exp.(tran (neg (Var "A")) * (tran (neg (Var "B"))))), []), "~A'*~B'.");
     ((Some(Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-
-                 ((neg (Var "C"))*(Num 4.)))), []), "~4*~A'+B'-~C*4.");
+                 ((neg (Var "C_123"))*(Num 4.)))), []), "~4*~A'+B'-~C_123*4.");
     ((Some(Exp.(tran (neg (tran (neg (Var "A" + Var "B")))))), []), "~(~(A+B)')'.")
   ]
 
