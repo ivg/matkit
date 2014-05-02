@@ -100,7 +100,7 @@ let rec ppr expr : ppr  =
   let open Printer in
   let open ExpPrinter in
   match expr with
-  | Num n -> string (Float.to_string n)
+  | Num n -> string (sprintf "%g" n)
   | Var v -> string v
   | Uop (op, expr') ->
     (match op with
