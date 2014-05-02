@@ -8,7 +8,7 @@ open Ast
 
 type t = exp
 
-val var: char -> t
+val var: string -> t
 val num: float -> t
 val int: int -> t
 val ( * ): t -> t -> t
@@ -26,6 +26,8 @@ val is_var: t -> bool
 
 val fold: t -> init:'a -> f:(t -> 'a -> 'a) -> 'a
 
+val ppr: t -> ppr
+val ppr_list: t list -> ppr
 
 include Hashable.S with type t := t
 include Comparable.S with type t := t
