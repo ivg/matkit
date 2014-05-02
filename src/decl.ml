@@ -42,21 +42,25 @@ let ppr_prop prop =
 
 let ppr (s,prop) = Printer.(string s ++ space ++ ppr_prop prop)
 
-let ppr_list (decls : t list) =
-  let open Printer in
+
+(** groups declaration by a symbol name. *)
+let group decls =
   let sorted =
     List.sort ~cmp:(fun (s1,_) (s2,_) -> Sym.ascending s1 s2) decls in
   let groups =
     List.group sorted ~break:(fun (s1,_) (s2,_) -> Sym.(s1 <> s2)) in
-  let grouped =
-    List.map groups ~f:(fun ds -> match ds with
-        | [] -> assert false
-        | (s,p)::ds ->
-          let cmp = compare_property in
-          let equal p1 p2 = cmp p1 p2 = 0 in
-          let ps = List.sort ~cmp (p :: List.map ds ~f:snd) in
-          s, List.remove_consecutive_duplicates ~equal ps) in
+  List.map groups ~f:(fun ds -> match ds with
+      | [] -> assert false
+      | (s,p)::ds ->
+        let cmp = compare_property in
+        let equal p1 p2 = cmp p1 p2 = 0 in
+        let ps = List.sort ~cmp (p :: List.map ds ~f:snd) in
+        s, List.remove_consecutive_duplicates ~equal ps)
 
+
+let ppr_list (decls : t list) =
+  let open Printer in
+  let grouped = group decls in
   let ppr_group (s,props) =
     let sep = space ++ string "and" ++ space in
     string s ++ space ++ string "is" ++ space ++

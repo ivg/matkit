@@ -1,7 +1,7 @@
 {
 open Core.Std
 open Lexing
-open Parser
+open Matlan_parser
 }
 
 (* numbers *)

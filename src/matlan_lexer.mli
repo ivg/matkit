@@ -3,5 +3,5 @@
 *)
 
 
-val tokens: Lexing.lexbuf -> Parser.token
+val tokens: Lexing.lexbuf -> Matlan_parser.token
 (** [tokens buf] returns a token from a lexing buffer [buf]  *)

@@ -1,0 +1,5 @@
+Authors of matkit:
+
+* Ivan Gotovchits <ivg@ieee.org>
+* Thomas Leu <tomleu@gmail.com>
+

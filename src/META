@@ -1,0 +1,13 @@
+# OASIS_START
+# DO NOT EDIT (digest: 2eb53abe4df56a0ebb5ef76ca2ceb30d)
+version = "1.0"
+description = "A matrix toolkit"
+requires =
+"core core.syntax treeprint camlp4 threads sexplib.syntax comparelib.syntax fieldslib.syntax variantslib.syntax enumerate.syntax"
+archive(byte) = "matkit.cma"
+archive(byte, plugin) = "matkit.cma"
+archive(native) = "matkit.cmxa"
+archive(native, plugin) = "matkit.cmxs"
+exists_if = "matkit.cma"
+# OASIS_STOP
+

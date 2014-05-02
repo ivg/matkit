@@ -9,7 +9,8 @@ with sexp
 let string_of_parser_output out =
   Sexp.to_string (sexp_of_parser_output out)
 
-let parse x = Parser.script Lexer.tokens (Lexing.from_string x)
+let parse x =
+  Matlan_parser.script Matlan_lexer.tokens (Lexing.from_string x)
 
 let print_parse data =
   parse data

@@ -1,0 +1,48 @@
+This is the INSTALL file for the matkit distribution.
+
+This package uses OASIS to generate its build system. See section OASIS for
+full information.
+
+Dependencies
+============
+
+In order to compile this package, you will need:
+
+* ocaml
+* findlib
+* core
+* treeprint
+* sexplib
+* comparelib
+* fieldslib
+* variantslib
+* enumerate
+
+The easiest way is to install it via opam.
+
+Installing
+==========
+
+1. Uncompress the source archive and go to the root of the package
+2. Run './configure --prefix=`opam config var prefix` --enable-tests
+3. Run 'make'
+4. Run 'make test'
+4. Run 'make install'
+
+Note: you can change installation path to whatever you like. By default,
+configure tries to install into the system directory, thus requiring
+one to have an admin rights. 
+
+Uninstalling
+============
+
+1. Go to the root of the package
+2. Run 'make uninstall'
+
+OASIS
+=====
+
+OASIS is a program that generates a setup.ml file using a simple '_oasis'
+configuration file. The generated setup only depends on the standard OCaml
+installation: no additional library is required.
+
