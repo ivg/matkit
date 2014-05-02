@@ -5,7 +5,7 @@ type t = script with sexp,compare
 
 
 let load chan : t =
-  Lexing.from_channel chan |> Parser.script Lexer.tokens
+  Lexing.from_channel chan |> Matlan_parser.script Matlan_lexer.tokens
 
 let save (script : t) chan : unit =
   let open Printer in

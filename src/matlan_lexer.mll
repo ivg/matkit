@@ -1,7 +1,7 @@
 {
 open Core.Std
 open Lexing
-open Parser
+open Matlan_parser
 }
 
 (* numbers *)
@@ -31,7 +31,7 @@ let whitespace = (newline | space)*
 let let_t = "let "
 let is = " is "
 let are = " are "
-let be = " be " 
+let be = " be "
 let in_t = "in "
 let ring = "ring "
 let and_t = "and "

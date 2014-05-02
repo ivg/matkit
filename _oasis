@@ -1,0 +1,65 @@
+OASISFormat: 0.3
+Name: matkit
+Version: 1.0
+Synopsis: A matrix toolkit
+Authors: Ivan Gotovchits <ivg@ieee.org>, Thomas Leu <tomleu@gmail.com>
+License: MIT
+Plugins: META (0.3), StdFiles (0.3), DevFiles(0.3)
+BuildDepends: core, core.syntax, treeprint, camlp4, threads, sexplib.syntax, comparelib.syntax, fieldslib.syntax, variantslib.syntax, enumerate.syntax
+
+
+Library matkit
+  Path: src
+  BuildTools: ocamlbuild
+  CompiledObject: best
+  Modules: Ast, Ctx, Decl, Dim, Exp, Infer, Matlan_lexer, Matlan_parser, Nat1, Ring, Script, Type, Typing, UnionFind
+  Install: true
+
+Executable matkit
+  Path: src
+  BuildTools: ocamlbuild
+  BuildDepends: matkit
+  CompiledObject: best
+  Install: true
+  MainIs: matkit.ml
+
+
+Executable test_typing
+  Path: src/tests
+  BuildTools: ocamlbuild
+  BuildDepends: matkit
+  CompiledObject: best
+  Install: false
+  MainIs: test_typing.ml
+
+Executable test_parsing
+  Path: src/tests
+  BuildTools: ocamlbuild
+  BuildDepends: matkit
+  CompiledObject: best
+  Install: false
+  MainIs: test_parsing.ml
+
+Executable test_decl
+  Path: src/tests
+  BuildTools: ocamlbuild
+  BuildDepends: matkit
+  CompiledObject: best
+  Install: false
+  MainIs: test_decl.ml
+
+Executable test_exp
+  Path: src/tests
+  BuildTools: ocamlbuild
+  BuildDepends: matkit
+  CompiledObject: best
+  Install: false
+  MainIs: test_exp.ml
+
+Test all
+  Command: sh run_tests.sh  
+  Run: true         
+
+
+
+           
