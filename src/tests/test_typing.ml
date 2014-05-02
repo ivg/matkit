@@ -49,8 +49,8 @@ let kind k = Kind k
 
 let () =
   try
-    let x,_,_ = Exp.(var 'x', var 'y', var 'z') in
-    let a,b,c = Exp.(var 'A', var 'B', var 'C') in
+    let x,_,_ = Exp.(var "x", var "y", var "z") in
+    let a,b,c = Exp.(var "A", var "B", var "C") in
     let _2,_3 = Exp.(int 2, int 3) in
     let exp1 = Exp.(tran x * a * x) in
     assert_type exp1 exp1 "1";
@@ -93,7 +93,7 @@ let () =
                                        "B", ring "M,N";
                                        "C", ring "N,M";
                                       ];
-  with Type_error (t1,t2) ->
+  with Type_error (t1,t2,_) ->
     eprintf "type mismatches: %s <> %s\n"
       (Dim.to_string t1)
       (Dim.to_string t2);

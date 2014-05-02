@@ -12,10 +12,12 @@ let save (script : t) chan : unit =
   let dot = string "." ++ flush in
   let pprs = List.map script ~f:(function
       | None, decs  -> Decl.ppr_list decs
-      | Some _,decs -> let decs = Decl.ppr_list decs in
-        string "unimplemented," ++ flush ++ string "where" ++
+      | Some exp,decs ->
+        let decs = Decl.ppr_list decs in
+        box 2 (Exp.ppr exp) ++ string "," ++
+        flush ++ string "where" ++
         decs ++ dot) in
-  let ppr = list 0.0 flush pprs in
+  let ppr = list 0.1 flush pprs in
   let out = Format.formatter_of_out_channel chan in
-  Printer.format ident out ppr;
+  Printer.format (fun ppr -> box 2 ppr) out ppr;
   flush_all ()

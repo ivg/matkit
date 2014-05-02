@@ -35,25 +35,48 @@ module ExpPrinter = struct
  open Printer
  (** Helper functions for pretty printing **)
 
+ (** this overrides binop for truly assosiative operators, such as
+     multiplication, addition, i.e, such operations that:
+     a @ b @ c = (a @ b) @ c = a @ (b @ c).
+     The reason to introduce this override was juxtaposition. Since we
+     introduced it in our grammar as a right recursive rule, it parses
+     [ABCD] as [A(B(CD)], although it is mathematically correct, it
+     leads to an ugly printing.
+
+     Note: With this printer we cannot assume that div and mul have
+     the same precedence, and rely on assosiativity to rule out the
+     proper order of application (since division is not truly
+     assosiative). Thats why I reduced div precedence below
+     multiplication.
+
+     Note: this all should be highly tested!
+  *)
+ let assoc_binop : level -> op:ppr -> ppr -> ppr -> ppr =
+   fun lev ~op:sep l r ->
+     parenbox Left lev (level lev (left l ++ sep ++ left r))
+
  (** BINARY OPERATORS **)
+
+
+ let eql_lev = 0.8
+ let add_lev = 1.0
+ let div_lev = 1.5
+ let mul_lev = 2.0
+ let pow_lev = 3.0
 
  let mbinop lev sep = binop Left lev ~op:(string sep)
  (** All matlan binops are left associative except equals **)
 
- let eql_lev = 0.8
- let add_lev = 1.0
- let mul_lev = 2.0
- let pow_lev = 3.0
 
  let ( =.  )  = binop Noassoc eql_lev ~op:(space ++ string "=" ++ space)
- let ( +   )  = mbinop add_lev "+" 
+ let ( +   )  = mbinop add_lev "+"
  let ( -   )  = mbinop add_lev "-"
- let ( *   )  = mbinop mul_lev ""
+ let ( *   )  = assoc_binop mul_lev ~op:nop
  let ( *.  ) = mbinop mul_lev "*."
- let ( /   )  = mbinop mul_lev "/"
- let ( /.  ) = mbinop mul_lev "/."
+ let ( /   )  = mbinop div_lev "/"
+ let ( /.  ) = mbinop div_lev "/."
  let ( **  )  = mbinop pow_lev "^"
- let ( **. ) = mbinop pow_lev "^." 
+ let ( **. ) = mbinop pow_lev "^."
 
  (** Unary Operators **)
  let mprefix lev op = prefix lev ~op:(string op)
@@ -64,8 +87,8 @@ module ExpPrinter = struct
 
  let neg  = mprefix neg_lev "~"
  let inv  = mpostfix inv_lev "`"
- let tran = mpostfix inv_lev "/'"
- let conj = mpostfix inv_lev "^C" (** placeholder until representation is decided **)
+ let tran = mpostfix inv_lev "'"
+ let conj = mpostfix inv_lev "\"" (** placeholder until representation is decided **)
 end
 
 let is_inv expr =
@@ -73,7 +96,7 @@ let is_inv expr =
   | Bop(Pow, expr', Num (-1.0)) -> true
   | _ -> false
 
-let rec ppr expr : ppr  = 
+let rec ppr expr : ppr  =
   let open Printer in
   let open ExpPrinter in
   match expr with
@@ -84,7 +107,7 @@ let rec ppr expr : ppr  =
     | Tran -> tran (ppr expr')
     | Conj -> conj (ppr expr')
     | UNeg -> neg (ppr expr'))
-  | Bop (op, expr1, expr2) -> 
+  | Bop (op, expr1, expr2) ->
     (if (is_inv expr) then (inv (ppr expr1)) else
     let expr1_ppr = ppr expr1 in
     let expr2_ppr = ppr expr2 in
@@ -99,6 +122,12 @@ let rec ppr expr : ppr  =
     | Pow  -> expr1_ppr **  expr2_ppr
     | HPow -> expr1_ppr **. expr2_ppr)
   | Ind (expr', dim1, dim2) -> failwith "Todo"
+
+
+let ppr exp =
+  let open Debug in
+  eprints "exp" exp sexp_of_exp;
+  ppr exp
 
 let ppr_list exprs = failwith "Todo"
 

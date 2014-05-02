@@ -2,7 +2,8 @@
 
 # yet another overloading.
 
-ABC = (CB)', where A is scalar.
+A(B/C).
+A * (B / C).
 
 
 

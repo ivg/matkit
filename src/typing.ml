@@ -187,5 +187,5 @@ let infer (script : script) : subst =
 let is_scalar (d1,d2) = Dim.(d1 = one && d2 = one)
 let is_vector (d1,d2) = Dim.(d1 <> one && d2 = one)
 
-let string_of_error d1 d2 subst =
-  sprintf "%s is not equal to %s" Dim.(to_string d1) Dim.(to_string d2)
+(* let string_of_error d1 d2 subst = *)
+(*   sprintf "%s is not equal to %s" Dim.(to_string d1) Dim.(to_string d2) *)
