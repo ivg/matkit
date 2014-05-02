@@ -2,21 +2,7 @@
 open Core.Std
 open Lexing
 open Parser
-
-(* inside this curly brackets you can write any helper functions in a
-   pure ocaml. Though, I'll suggest to put your code in a separate module.
-
-   The code here will be called before lexer invocation.
-*)
-
-
 }
-
-
-(* here you can define shortcuts for regexps in a simple syntactic
-   form «let name = regexp». *)
-
-
 
 (* numbers *)
 let digit = ['0'-'9']
@@ -30,7 +16,7 @@ let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
 let character = (lowercase | uppercase)
 let index = '[' (integer | character+) (',' (integer | character+))? ']'
-let id = character index? 
+let id = character index?
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"
@@ -41,10 +27,10 @@ let whitespace = (newline | space)*
 (* current definition is not sufficient, reimplement
  * after word break sign is worked out *)
 let where = "where "
-let is = "is " 
+let is = "is "
 let in_t = "in "
-let ring = "ring " 
-let and_t = "and " 
+let ring = "ring "
+let and_t = "and "
 
 rule tokens = parse
   | eof {END}
@@ -78,8 +64,8 @@ rule tokens = parse
   | "#" {comment lexbuf}
 and comment = parse
   | newline {new_line lexbuf; tokens lexbuf}
+  | _ {comment lexbuf}
   | eof {END}
 
 {
 }
-
