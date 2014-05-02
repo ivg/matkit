@@ -1,7 +1,7 @@
 open Core.Std
 open Ast
 
-let var s = Var (Sym.of_char s)
+let var s = Var s
 let is_var = function
   | Var _ -> true
   | _ -> false
@@ -31,75 +31,76 @@ let fold t ~init ~f =
       loop a e2 in
   loop init t
 
-open Printer
-(** Helper functions for pretty printing **)
-(** Nums and Vars **)
-let var v = string v
-let num n = string (Float.to_string n)
+module ExpPrinter = struct
+ open Printer
+ (** Helper functions for pretty printing **)
 
-(** BINARY OPERATORS **)
+ (** BINARY OPERATORS **)
 
-let mbinop lev sep = binop Left lev ~op:(string sep)
-(** All matlan binops are left associative except equals **)
+ let mbinop lev sep = binop Left lev ~op:(string sep)
+ (** All matlan binops are left associative except equals **)
 
-let eql_lev = 0.8
-let add_lev = 1.0
-let mul_lev = 2.0
-let pow_lev = 3.0
+ let eql_lev = 0.8
+ let add_lev = 1.0
+ let mul_lev = 2.0
+ let pow_lev = 3.0
 
-let eql  = binop Noassoc eql_lev ~op:(space ++ string "=" ++ space)
-let add  = mbinop add_lev "+" 
-let sub  = mbinop add_lev "-"
-let mul  = mbinop mul_lev ""
-let hmul = mbinop mul_lev "*."
-let div  = mbinop mul_lev "/"
-let hdiv = mbinop mul_lev "/."
-let pow  = mbinop pow_lev "^"
-let hpow = mbinop pow_lev "^." 
+ let ( =.  )  = binop Noassoc eql_lev ~op:(space ++ string "=" ++ space)
+ let ( +   )  = mbinop add_lev "+" 
+ let ( -   )  = mbinop add_lev "-"
+ let ( *   )  = mbinop mul_lev ""
+ let ( *.  ) = mbinop mul_lev "*."
+ let ( /   )  = mbinop mul_lev "/"
+ let ( /.  ) = mbinop mul_lev "/."
+ let ( **  )  = mbinop pow_lev "^"
+ let ( **. ) = mbinop pow_lev "^." 
 
-(** Unary Operators **)
-let mprefix lev op = prefix lev ~op:(string op)
-let mpostfix lev op = postfix lev ~op:(string op)
+ (** Unary Operators **)
+ let mprefix lev op = prefix lev ~op:(string op)
+ let mpostfix lev op = postfix lev ~op:(string op)
 
-let neg_lev = 5.0
-let inv_lev = 4.0
+ let neg_lev = 5.0
+ let inv_lev = 4.0
 
-let neg  = mprefix neg_lev "~"
-let inv  = mpostfix inv_lev "`"
-let tran = mpostfix inv_lev "/'"
-let conj = mpostfix inv_lev "^C" (** placeholder until representation is decided **)
-s
+ let neg  = mprefix neg_lev "~"
+ let inv  = mpostfix inv_lev "`"
+ let tran = mpostfix inv_lev "/'"
+ let conj = mpostfix inv_lev "^C" (** placeholder until representation is decided **)
+end
 
 let is_inv expr =
   match expr with
   | Bop(Pow, expr', Num (-1.0)) -> true
   | _ -> false
 
-let ppr_unop op = function
-  | Tran -> tran
-  | Conj -> conj
-  | Uneg -> neg
-and
-let ppr_binop op = function
-    | Eql  -> eql
-    | Add  -> add
-    | Sub  -> sub
-    | Mul  -> mul
-    | Had  -> had
-    | Div  -> div
-    | HDiv -> hdiv
-    | Pow  -> pow
-    | HPow -> hpow
-and
-let rec ppr expr = function
-  | Num n -> num n
-  | Var v -> var v
+let rec ppr expr : ppr  = 
+  let open Printer in
+  let open ExpPrinter in
+  match expr with
+  | Num n -> string (Float.to_string n)
+  | Var v -> string v
   | Uop (op, expr') ->
-    (ppr_unop op) ++ (ppr expr')
+    (match op with
+    | Tran -> tran (ppr expr')
+    | Conj -> conj (ppr expr')
+    | UNeg -> neg (ppr expr'))
   | Bop (op, expr1, expr2) -> 
-    if (is_inv expr) then (inv ++ ppr expr1) else
-    (ppr expr1) ++ (ppr_binop op) ++ (ppr expr2)
+    (if (is_inv expr) then (inv (ppr expr1)) else
+    let expr1_ppr = ppr expr1 in
+    let expr2_ppr = ppr expr2 in
+    match op with
+    | Eql  -> expr1_ppr =.  expr2_ppr
+    | Add  -> expr1_ppr +   expr2_ppr
+    | Sub  -> expr1_ppr -   expr2_ppr
+    | Mul  -> expr1_ppr *   expr2_ppr
+    | Had  -> expr1_ppr *.  expr2_ppr
+    | Div  -> expr1_ppr /   expr2_ppr
+    | HDiv -> expr1_ppr /.  expr2_ppr
+    | Pow  -> expr1_ppr **  expr2_ppr
+    | HPow -> expr1_ppr **. expr2_ppr)
   | Ind (expr', dim1, dim2) -> failwith "Todo"
+
+let ppr_list exprs = failwith "Todo"
 
 module T = struct
   type t = exp with sexp,compare
