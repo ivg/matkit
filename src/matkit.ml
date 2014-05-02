@@ -14,11 +14,12 @@ let infer_cmd =
   Command.basic
     ~summary:"Checks and infers properties of the script"
     spec (fun input output () ->
+        let script = In_channel.with_file input ~f:Script.load in
         try
-          let script = In_channel.with_file input ~f:Script.load in
           let script = Infer.process script in
           Out_channel.with_file output ~f:(Script.save script)
         with Type_error (d1,d2,subst) ->
+          Script.save script stdout;
           let err = Typing.ppr_error d1 d2 subst in
           let out = Format.std_formatter in
           Printer.format ident out err)

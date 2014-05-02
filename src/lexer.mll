@@ -61,6 +61,7 @@ rule tokens = parse
   | "{" {LCUR}
   | "}" {RCUR}
   | "," {COMMA}
+  | "\"" {CONJ}
   | "#" {comment lexbuf}
 and comment = parse
   | newline {new_line lexbuf; tokens lexbuf}

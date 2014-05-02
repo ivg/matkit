@@ -190,7 +190,7 @@ let is_vector (d1,d2) = Dim.(d1 <> one && d2 = one)
 let ppr_error d1 d2 subst : ppr =
   let open Printer in
   let title =
-    string "type error: " ++
+    string "Failing due to a type error: " ++
     Dim.ppr d1 ++ string " <> " ++
     Dim.ppr d2 ++ string ", " ++
     flush ++ string "where" in
