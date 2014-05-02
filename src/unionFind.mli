@@ -7,7 +7,7 @@ type t with sexp
 val create: unit -> t
 (** [create ()] creates a new disjoint-set  *)
 
-val find: t -> dim -> dim
+val find: t -> dim -> dim option
 (** [find uf t] returns an term, representing  term [t] *)
 
 val union: t -> dim -> dim -> t

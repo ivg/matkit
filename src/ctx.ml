@@ -74,6 +74,9 @@ let create_substitution env ds  =
   let module Map = Exp.Map in
   let (init : ty Map.t) = Map.empty in
   Table.fold env ~init ~f:(fun ~key:expr ~data:(t1,t2) map ->
-      let t1 = UnionFind.find ds t1 in
-      let t2 = UnionFind.find ds t2 in
-      Map.add map ~key:expr ~data:(t1,t2))
+      let ty = match UnionFind.(find ds t1, find ds t2) with
+        | Some t1, Some t2 -> (t1,t2)
+        | Some t1, None    -> (t1,t2)
+        | None,    Some t2 -> (t1,t2)
+        | None,    None    -> (t1,t2) in
+      Map.add map ~key:expr ~data:ty)

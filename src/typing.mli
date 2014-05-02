@@ -10,4 +10,4 @@ val infer: script -> subst
 val is_scalar: ty -> bool
 val is_vector: ty -> bool
 
-(* val string_of_error: ty -> string *)
+val ppr_error: dim -> dim -> subst -> ppr

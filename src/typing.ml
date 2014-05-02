@@ -187,5 +187,15 @@ let infer (script : script) : subst =
 let is_scalar (d1,d2) = Dim.(d1 = one && d2 = one)
 let is_vector (d1,d2) = Dim.(d1 <> one && d2 = one)
 
-(* let string_of_error d1 d2 subst = *)
-(*   sprintf "%s is not equal to %s" Dim.(to_string d1) Dim.(to_string d2) *)
+let ppr_error d1 d2 subst : ppr =
+  let open Printer in
+  let title =
+    string "type error: " ++
+    Dim.ppr d1 ++ string " <> " ++
+    Dim.ppr d2 ++ string ", " ++
+    flush ++ string "where" in
+  let subst = Exp.Map.to_alist subst |> List.map ~f:(fun (e,(d1,d2)) ->
+      Exp.ppr e  ++ string " : " ++ string "{" ++
+      Dim.ppr d1 ++ string "," ++ Dim.ppr d2 ++ string "}")  in
+  let sep = flush ++ string "      " in
+  title ++ sep ++ list 0.1 sep subst ++ flush
