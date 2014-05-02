@@ -15,8 +15,10 @@ let decimal = digit* frac? exp?
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
 let character = (lowercase | uppercase)
-let index = '[' (integer | character+) (',' (integer | character+))? ']'
-let id = character index?
+(** indexing not implemented **)
+(*let index = '[' (integer | character+) (',' (integer | character+))? ']'*)
+let subscript = '_' character
+let id = character subscript?
 
 (* whitespace *)
 let newline = '\n' | '\r' | "\r\n" | "\n\r"

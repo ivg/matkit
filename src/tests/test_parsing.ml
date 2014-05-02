@@ -70,7 +70,7 @@ let test_binop () =
 let test_combinations () =
   printf "*** Testing Combined Operations ***\n";
   test_parses [
-    ((Some(Exp.(neg (Var "A[i,j]") + Var "B")), []), "~A[i,j]+B.");
+    ((Some(Exp.(neg (Var "A_k") + Var "B")), []), "~A_k+B.");
     ((Some(Exp.(neg (Var "A") + (neg (Var "B")))), []), "~A+~B.");
     ((Some(Exp.(tran (neg (Var "A")) * (tran (neg (Var "B"))))), []), "~A'*~B'.");
     ((Some(Exp.(((neg (Num 4.)*(tran(neg (Var "A"))))+(tran(Var "B")))-
