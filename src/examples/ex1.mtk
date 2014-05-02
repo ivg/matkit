@@ -1,7 +1,7 @@
 #!/usr/bin/env matkit
 
 # A simple example.  It should be infered, that A has type [N,M],
-# and b and x are vectors of size M.
+# and b and x are vectors of sizes N and M, respectively.
 
 Ax = b.
 

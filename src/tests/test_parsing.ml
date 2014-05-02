@@ -14,7 +14,7 @@ let parse x = Parser.script Lexer.tokens (Lexing.from_string x)
 let print_parse data =
   parse data
   |> string_of_parser_output
-  |>printf "%s%!\n"
+  |> printf "%s%!\n"
 
 
 (*** TEST PARSING HELPERS ***)

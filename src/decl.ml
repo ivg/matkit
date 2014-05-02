@@ -33,10 +33,10 @@ let ppr_prop prop =
     seq [str "scalar"; str "in"; ring r]
   | Ring (r, Some ((d1,_) as ds)) when Typing.is_vector ds ->
     seq [str "in"; ring r;
-         (str "[" ++ Dim.ppr d1 ++ str "]")]
+         (str "{" ++ Dim.ppr d1 ++ str "}")]
   | Ring (r, Some (d1,d2)) ->
     seq [str "in"; ring r;
-         (str "[" ++ Dim.ppr d1 ++ str "," ++ Dim.ppr d2 ++ str "]")]
+         (str "{" ++ Dim.ppr d1 ++ str "," ++ Dim.ppr d2 ++ str "}")]
   | Kind s -> seq [str s] in
   box 2 ppr
 

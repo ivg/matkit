@@ -18,7 +18,7 @@ let remove ss t =
 let union t s1 s2 : t =
   match get t s1, get t s2 with
   | Some ss1, Some ss2 ->
-    Set.union ss1 ss2 :: t |> remove ss1 |> remove ss2
+    Set.union ss1 ss2 :: (t |> remove ss1 |> remove ss2)
   | Some ss, None -> Set.add ss s2 :: remove ss t
   | None, Some ss -> Set.add ss s1 :: remove ss t
   | None, None -> Set.add (Set.singleton s1) s2 :: t

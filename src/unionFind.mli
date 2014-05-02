@@ -2,7 +2,7 @@
 open Core.Std
 open Ast
 
-type t
+type t with sexp
 
 val create: unit -> t
 (** [create ()] creates a new disjoint-set  *)

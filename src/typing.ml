@@ -135,7 +135,7 @@ let constraints ctx ucs exp : (ty * constrs) =
 module Subst = struct
   include Dim.Table
 
-  let substitute (f,t) x = if x = f then t else x
+  let substitute (f,t) x = Dim.(if x = f then t else x)
   let replace t s = map t ~f:(substitute s)
 
   let extend_replace t (t1,t2) =
@@ -168,7 +168,7 @@ let infer (script : script) : subst =
       | None,_ -> []) in
   let cs = List.concat (ucs :: cs) |>
            List.sort ~cmp:compare  |>
-           List.dedup in
+           List.remove_consecutive_duplicates ~equal:(=) in
   let subst = Subst.create () in
   let subst = unify cs subst in
   let ds = Subst.fold subst ~init:(UnionFind.create ())

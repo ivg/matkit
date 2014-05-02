@@ -1,0 +1,8 @@
+#!/usr/bin/env matkit
+
+#It should be «infered», that A has type [N,N],
+# and b and x are vectors of size N.
+
+Ax = b, where A is in R{N,N}.
+
+
