@@ -22,8 +22,6 @@ let scalar s = kind s ~is:"scalar"
 
 let assoc s = List.map ~f:(fun prop -> prop s)
 
-let is_scalar (d1,d2) = Dim.(d1 = one && d2 = one)
-
 let ppr_prop prop =
   let open Printer in
   let str = string in
@@ -31,9 +29,9 @@ let ppr_prop prop =
   let seq = list 1.0 space in
   match prop with
   | Ring (r,None) -> seq [str "in"; ring r]
-  | Ring (r, Some ds) when is_scalar ds ->
+  | Ring (r, Some ds) when Typing.is_scalar ds ->
     seq [str "scalar"; str "in"; ring r]
-  | Ring (r, Some (d1,d2)) when Dim.(d2 = one) ->
+  | Ring (r, Some ((d1,_) as ds)) when Typing.is_vector ds ->
     seq [str "in"; ring r;
          (str "[" ++ Dim.ppr d1 ++ str "]")]
   | Ring (r, Some (d1,d2)) ->

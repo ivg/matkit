@@ -174,3 +174,6 @@ let infer (script : script) : subst =
   let ds = Subst.fold subst ~init:(UnionFind.create ())
       ~f:(fun ~key:lhs ~data:rhs set -> UnionFind.union set lhs rhs) in
   Ctx.create_substitution env ds
+
+let is_scalar (d1,d2) = Dim.(d1 = one && d2 = one)
+let is_vector (d1,d2) = Dim.(d1 <> one && d2 = one)

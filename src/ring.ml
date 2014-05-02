@@ -1,7 +1,10 @@
 open Core.Std
 open Ast
 
-type t = ring with sexp,compare,enumerate
+module T = struct
+  type t = ring with sexp,compare,enumerate
+end
+include T
 
 let real = R
 let integer = Z
@@ -27,3 +30,5 @@ let of_string= function
     invalid_arg msg
 
 let ppr t = to_string t |> Printer.string
+
+include Comparable.Make(T)

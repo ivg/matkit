@@ -3,6 +3,7 @@ open Ast
 
 type t = ring with sexp,compare,enumerate
 include Stringable with type t := t
+include Comparable with type t := t
 
 val real: t
 val integer: t
