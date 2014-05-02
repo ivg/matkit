@@ -17,7 +17,7 @@ let uppercase = ['A'-'Z']
 let character = (lowercase | uppercase)
 (** indexing not implemented **)
 (*let index = '[' (integer | character+) (',' (integer | character+))? ']'*)
-let subscript = '_' character
+let subscript = '_' (character | digit+)
 let id = character subscript?
 
 (* whitespace *)
