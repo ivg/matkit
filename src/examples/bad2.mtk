@@ -1,0 +1,5 @@
+#!/usr/bin/env matkit
+
+# this script should raise a type error.
+
+AA, where A is in R{N,M}.
