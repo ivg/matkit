@@ -62,6 +62,8 @@ val scalar: sym -> t
 val assoc: sym -> (sym -> t) list -> t list
 (** [assoc sym props] assosiates properties [props] with a symbol
     [sym] *)
+val group_assoc: sym list -> (sym -> t) list -> t list
+
 
 val ppr: t -> ppr
 

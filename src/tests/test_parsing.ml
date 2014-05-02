@@ -84,24 +84,28 @@ let test_decls () =
   let d1,d2 = Dim.(of_sym "m", of_sym "n") in
 
   test_parses [
-    ((None, Decl.([kind "A" ~is:"invertible"])), "A is invertible.");
-    ((None, Decl.(assoc "A" [real ~d1 ~d2])), "A is in R {m,n}.");
+    ((None, Decl.([kind "A" ~is:"invertible"])), "let A be invertible.");
+    ((None, Decl.(assoc "A" [real ~d1 ~d2])), "let A is in R {m,n}.");
     ((None, Decl.(assoc "A" [kind ~is:"invertible"; real ~d1 ~d2])),
-      "A is invertible and in ring {m,n}.");
+      "let A is invertible and in ring {m,n}.");
     ((None, Decl.(assoc "A" [kind ~is:"square"; kind ~is:"invertible"; is_real])),
-      "A is square and invertible, A is in ring R.");
+      "let A is square and invertible, let A be in ring R.");
 
     ((None, Decl.(assoc "A" [real ~d1 ~d2:Dim.one; kind ~is:"invertible"])),
-      "A is in R {m} and invertible.");
+      "let A is in R {m} and invertible.");
 
     ((None, (Decl.([kind "A" ~is:"invertible"; kind "B" ~is:"invertible"]))),
-      "A is invertible,
-       B is invertible.");
+      "let A is invertible,
+       let B is invertible.");
     ((None, (Decl.([kind "A" ~is:"invertible"; kind "B"
                       ~is:"invertible"] @ assoc "A" [is_real]))),
-      "A is invertible,
-       B is invertible,
-       A is in R.");
+      "let A be invertible,
+       let B be invertible,
+       let A be in R.");
+    ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"invertible"; real ~d1 ~d2]))),
+      "let A,B be invertible and in ring R {m,n}.");
+    ((None, (Decl.(group_assoc ["A";"B"] [kind ~is:"square"; kind ~is:"invertible"]))),
+      "let A and B be square and invertible");
   ]
 
 let run_tests () =

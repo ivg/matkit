@@ -2,5 +2,5 @@
 
 # this script should raise a type error.
 
-xAx, where A is in R{N,M}.
+xAx, let A be in R{N,M}.
 
