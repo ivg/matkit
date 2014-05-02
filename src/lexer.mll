@@ -2,7 +2,6 @@
 open Core.Std
 open Lexing
 open Parser
-open Str
 }
 
 (* numbers *)

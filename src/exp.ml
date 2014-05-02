@@ -72,11 +72,11 @@ module ExpPrinter = struct
  let ( +   )  = mbinop add_lev "+"
  let ( -   )  = mbinop add_lev "-"
  let ( *   )  = assoc_binop mul_lev ~op:nop
- let ( *.  ) = mbinop mul_lev "*."
+ let ( *.  ) = mbinop mul_lev ".*"
  let ( /   )  = mbinop div_lev "/"
- let ( /.  ) = mbinop div_lev "/."
+ let ( /.  ) = mbinop div_lev "./"
  let ( **  )  = mbinop pow_lev "^"
- let ( **. ) = mbinop pow_lev "^."
+ let ( **. ) = mbinop pow_lev ".^"
 
  (** Unary Operators **)
  let mprefix lev op = prefix lev ~op:(string op)
