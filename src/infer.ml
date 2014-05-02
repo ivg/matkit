@@ -17,13 +17,13 @@ let bound_variables : exp option -> sym list = function
 
 (** removes rings from declarations  *)
 let remove_rings: decls -> decls =
-  List.filter ~f:(function (s,Ring _) -> false | _ -> true)
+  List.filter ~f:(function (_,Ring _) -> false | _ -> true)
 
 (** creates a ring maker for a var, based on a set of user
     declarations. In a case of multiple declarations the maximum ring
     is chosen, according to the following ordering: [Z < R < C].  *)
 let ring_for_var decs var : Decl.ring_decl =
-  let ds = List.filter_map decs (function
+  let ds = List.filter_map decs ~f:(function
       | (v,Ring (ring,_)) when Sym.(v = var) -> Some ring
       | _ -> None) in
   let decl_of_ring = function
