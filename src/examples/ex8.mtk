@@ -2,4 +2,6 @@
 
 # assigning kinds and rings to multiple variables at once
 
-AB=C, let A, B be square and in R {m}.
+let A, B, C are scalars.
+
+ABR = CRx.

@@ -11,7 +11,7 @@ let save (script : t) chan : unit =
   let open Printer in
   let dot = string "." ++ flush in
   let pprs = List.map script ~f:(function
-      | None, decs  -> Decl.ppr_list decs
+      | None, decs  -> nop
       | Some exp,decs ->
         let decs = Decl.ppr_list decs in
         box 2 (Exp.ppr exp) ++ string "," ++

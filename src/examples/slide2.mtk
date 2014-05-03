@@ -1,0 +1,6 @@
+
+
+
+# let's try to add some explicit constraints:
+
+Ax = b, where A is in R{N,N}.
